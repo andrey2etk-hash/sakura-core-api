@@ -26,6 +26,29 @@ app.get('/config', async (req, res) => {
         status: tenant.subscription_status
     });
 });
+// Отримання списку об'єктів для конкретного клієнта
+app.get('/objects', async (req, res) => {
+    const apiKey = req.headers['x-api-key'];
+    
+    // 1. Перевіряємо хто стукає (Tenant)
+    const { data: tenant, error: tError } = await supabase
+        .from('tenants')
+        .select('id')
+        .eq('api_key', apiKey)
+        .single();
 
+    if (tError || !tenant) return res.status(401).json({ error: 'Unauthorized' });
+
+    // 2. Беремо його об'єкти
+    const { data: objects, error: oError } = await supabase
+        .from('objects')
+        .select('*')
+        .eq('tenant_id', tenant.id)
+        .order('deadline', { ascending: true });
+
+    if (oError) return res.status(500).json({ error: oError.message });
+
+    res.json(objects);
+});
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Sakura API running on port ${PORT}`));
