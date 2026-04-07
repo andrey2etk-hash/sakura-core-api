@@ -1,82 +1,127 @@
 const express = require('express');
 const { createClient } = require('@supabase/supabase-js');
+
 const app = express();
 app.use(express.json());
 
+// Підключення до Supabase
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
 
-// ФУНКЦІЯ ПЕРЕВІРКИ (Middleware)
+// МІДЛВЕР ДЛЯ ПЕРЕВІРКИ ТОКЕНА
 function authenticateToken(req, res, next) {
   const token = req.headers['authorization'] || req.headers['x-api-key'];
-  if (token === `Bearer ${process.env.API_KEY}` || token === process.env.API_KEY) {
+  const expectedToken = process.env.API_KEY;
+  
+  if (token === `Bearer ${expectedToken}` || token === expectedToken) {
     return next();
   }
-  res.status(401).json({ error: 'Unauthorized' });
+  return res.status(401).json({ error: 'Unauthorized' });
 }
 
-// --- МАРШРУТИ ДЛЯ ОБ'ЄКТІВ ---
+// --- БАЗОВІ МАРШРУТИ ---
 
+app.get('/', (req, res) => {
+  res.send('🌸 Sakura API is Live and Running!');
+});
+
+// --- РОБОТА З ОБ'ЄКТАМИ ---
+
+// 1. Отримання всіх об'єктів
 app.get('/objects', authenticateToken, async (req, res) => {
-  const { data, error } = await supabase.from('objects').select('*').order('created_at', { ascending: false });
-  if (error) return res.status(500).json({ error: error.message });
-  res.json(data);
-});
+  try {
+    const { data, error } = await supabase
+      .from('objects')
+      .select('*')
+      .order('created_at', { ascending: false });
 
-app.post('/objects', authenticateToken, async (req, res) => {
-  const { data, error } = await supabase
-    .from('objects')
-    .insert([req.body])
-    .select();
-    
-  if (error) return res.status(500).json({ error: error.message });
-  res.json({ success: true, data: data[0] });
-});
-
-// --- МАРШРУТИ ДЛЯ ВИРОБІВ (ORDER ITEMS) ---
-
-app.get('/order_items', authenticateToken, async (req, res) => {
-  const { order_id } = req.query;
-  let query = supabase.from('order_items').select('*');
-  
-  if (order_id) {
-    query = query.eq('order_id', order_id);
+    if (error) throw error;
+    res.json(data);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
-  
-  const { data, error } = await query.order('full_job_number', { ascending: true });
-  if (error) return res.status(500).json({ error: error.message });
-  res.json(data);
 });
 
-app.post('/order_items', authenticateToken, async (req, res) => {
-  const { 
-    order_id, 
-    type_code, 
-    display_name, 
-    height, 
-    width, 
-    depth,    // <- має бути 'depth'
-    mass_kg, 
-    ip_rating 
-  } = req.body;
+// 2. Створення нового об'єкта
+app.post('/objects', authenticateToken, async (req, res) => {
+  try {
+    const { data, error } = await supabase
+      .from('objects')
+      .insert([req.body])
+      .select();
 
-  const { data, error } = await supabase
-    .from('order_items')
-    .insert([{ 
+    if (error) throw error;
+    res.json({ success: true, data: data[0] });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// --- РОБОТА З ВИРОБАМИ (ORDER ITEMS) ---
+
+// 1. Отримання виробів (опціонально фільтр за order_id)
+app.get('/order_items', authenticateToken, async (req, res) => {
+  try {
+    const { order_id } = req.query;
+    let query = supabase.from('order_items').select('*');
+
+    if (order_id) {
+      query = query.eq('order_id', order_id);
+    }
+
+    const { data, error } = await query.order('full_job_number', { ascending: true });
+    
+    if (error) throw error;
+    res.json(data);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// 2. Створення нового виробу (Лист Вводу)
+app.post('/order_items', authenticateToken, async (req, res) => {
+  try {
+    const { 
       order_id, 
       type_code, 
       display_name, 
-      height: height ? parseInt(height) : null, 
-      width: width ? parseInt(width) : null, 
-      depth: depth ? parseInt(depth) : null, // <- записуємо в 'depth'
-      mass_kg: mass_kg ? parseInt(mass_kg) : null,
-      ip_rating: ip_rating || 'IP00'
-    }])
-    .select();
+      height, 
+      width, 
+      depth, 
+      mass_kg, 
+      ip_rating 
+    } = req.body;
 
-  if (error) {
-    console.error("Supabase Error:", error.message);
-    return res.status(500).json({ error: error.message });
+    // Валідація обов'язкових полів
+    if (!order_id || !type_code || !display_name) {
+      return res.status(400).json({ error: 'Missing required fields: order_id, type_code, or display_name' });
+    }
+
+    const { data, error } = await supabase
+      .from('order_items')
+      .insert([{ 
+        order_id, 
+        type_code, 
+        display_name, 
+        height: height ? parseInt(height) : null, 
+        width: width ? parseInt(width) : null, 
+        depth: depth ? parseInt(depth) : null,
+        mass_kg: mass_kg ? parseInt(mass_kg) : null,
+        ip_rating: ip_rating || 'IP00'
+      }])
+      .select();
+
+    if (error) throw error;
+
+    // Повертаємо перший елемент масиву (створений об'єкт з full_job_number)
+    res.json(data[0]);
+  } catch (err) {
+    console.error("Supabase Error:", err.message);
+    res.status(500).json({ error: err.message });
   }
+});
 
-  res.json(data[0]);
+// ЗАПУСК СЕРВЕРА
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`🚀 Server is running on port ${PORT}`);
 });
