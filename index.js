@@ -14,31 +14,14 @@ function authenticateToken(req, res, next) {
   res.status(401).json({ error: 'Unauthorized' });
 }
 
-// 1. Маршрут для Об'єктів
+// --- МАРШРУТИ ДЛЯ ОБ'ЄКТІВ ---
+
 app.get('/objects', authenticateToken, async (req, res) => {
-  const { data, error } = await supabase.from('objects').select('*');
+  const { data, error } = await supabase.from('objects').select('*').order('created_at', { ascending: false });
   if (error) return res.status(500).json({ error: error.message });
   res.json(data);
 });
 
-// 2. Маршрут для Виробів (Те, що ми додавали)
-app.get('/order_items', authenticateToken, async (req, res) => {
-  const { order_id } = req.query;
-  let query = supabase.from('order_items').select('*');
-  
-  if (order_id) {
-    query = query.eq('order_id', order_id);
-  }
-  
-  const { data, error } = await query;
-  if (error) return res.status(500).json({ error: error.message });
-  res.json(data);
-});
-
-// Базовий перевірочний маршрут
-app.get('/', (req, res) => res.send('Sakura API is Live!'));
-
-// Маршрут для створення нового об'єкта
 app.post('/objects', authenticateToken, async (req, res) => {
   const { data, error } = await supabase
     .from('objects')
@@ -49,12 +32,32 @@ app.post('/objects', authenticateToken, async (req, res) => {
   res.json({ success: true, data: data[0] });
 });
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+// --- МАРШРУТИ ДЛЯ ВИРОБІВ (ORDER ITEMS) ---
 
-// Маршрут для створення НОВОГО ВИРОБУ (Лист Вводу)
+app.get('/order_items', authenticateToken, async (req, res) => {
+  const { order_id } = req.query;
+  let query = supabase.from('order_items').select('*');
+  
+  if (order_id) {
+    query = query.eq('order_id', order_id);
+  }
+  
+  const { data, error } = await query.order('full_job_number', { ascending: true });
+  if (error) return res.status(500).json({ error: error.message });
+  res.json(data);
+});
+
 app.post('/order_items', authenticateToken, async (req, res) => {
-  const { order_id, type_code, display_name, height, width, depth } = req.body;
+  const { 
+    order_id, 
+    type_code, 
+    display_name, 
+    height, 
+    width, 
+    depth, 
+    mass_kg, 
+    ip_rating 
+  } = req.body;
 
   const { data, error } = await supabase
     .from('order_items')
@@ -62,17 +65,24 @@ app.post('/order_items', authenticateToken, async (req, res) => {
       order_id, 
       type_code, 
       display_name, 
-      height: parseInt(height), 
-      width: parseInt(width), 
-      depth: parseInt(depth) 
+      height: height ? parseInt(height) : null, 
+      width: width ? parseInt(width) : null, 
+      depth: depth ? parseInt(depth) : null,
+      mass_kg: mass_kg ? parseInt(mass_kg) : null,
+      ip_rating: ip_rating || 'IP00'
     }])
-    .select(); // select() обов'язковий, щоб повернути згенерований full_job_number
+    .select(); // Повертає об'єкт вже з full_job_number від тригера
 
   if (error) {
     console.error("Supabase Error:", error.message);
     return res.status(500).json({ error: error.message });
   }
 
-  // Повертаємо створений об'єкт, де вже буде full_job_number (завдяки тригеру в БД)
   res.json(data[0]);
 });
+
+// БАЗОВІ МАРШРУТИ
+app.get('/', (req, res) => res.send('Sakura API is Live!'));
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
