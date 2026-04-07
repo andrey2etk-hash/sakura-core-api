@@ -128,3 +128,29 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`🚀 Server is running on port ${PORT}`);
 });
+
+// Архівування проєкту
+app.patch('/projects/:id/archive', authenticateToken, async (req, res) => {
+  const { id } = req.params;
+  const { data, error } = await supabase
+    .from('projects')
+    .update({ is_archived: true })
+    .eq('id', id)
+    .select();
+
+  if (error) return res.status(500).json({ error: error.message });
+  res.json({ success: true, message: "Проєкт перенесено в архів", data });
+});
+
+// Архівування конкретного виробу
+app.patch('/project_items/:id/archive', authenticateToken, async (req, res) => {
+  const { id } = req.params;
+  const { data, error } = await supabase
+    .from('project_items')
+    .update({ is_archived: true })
+    .eq('id', id)
+    .select();
+
+  if (error) return res.status(500).json({ error: error.message });
+  res.json({ success: true, message: "Виріб архівовано", data });
+});
