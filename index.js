@@ -83,7 +83,7 @@ app.post('/order_items', authenticateToken, async (req, res) => {
     const { 
       order_id, 
       type_code, 
-      display_name, 
+      display_name, // це приходить з Google Таблиці
       height, 
       width, 
       depth, 
@@ -91,17 +91,12 @@ app.post('/order_items', authenticateToken, async (req, res) => {
       ip_rating 
     } = req.body;
 
-    // Валідація обов'язкових полів
-    if (!order_id || !type_code || !display_name) {
-      return res.status(400).json({ error: 'Missing required fields: order_id, type_code, or display_name' });
-    }
-
     const { data, error } = await supabase
       .from('order_items')
       .insert([{ 
-        order_id, 
+        order_id, // тут має бути UUID, який прийшов з Select-списку
         type_code, 
-        display_name, 
+        display_name, // тепер у базі ми його перейменували на display_name
         height: height ? parseInt(height) : null, 
         width: width ? parseInt(width) : null, 
         depth: depth ? parseInt(depth) : null,
@@ -111,6 +106,12 @@ app.post('/order_items', authenticateToken, async (req, res) => {
       .select();
 
     if (error) throw error;
+    res.json(data[0]);
+  } catch (err) {
+    console.error("Помилка:", err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
 
     // Повертаємо перший елемент масиву (створений об'єкт з full_job_number)
     res.json(data[0]);
