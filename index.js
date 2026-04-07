@@ -21,16 +21,16 @@ function authenticateToken(req, res, next) {
 // --- БАЗОВІ МАРШРУТИ ---
 
 app.get('/', (req, res) => {
-  res.send('🌸 Sakura API is Live and Running!');
+  res.send('🌸 Sakura API is Live and Running with NEW Architecture!');
 });
 
-// --- РОБОТА З ОБ'ЄКТАМИ ---
+// --- РОБОТА З ПРОЄКТАМИ (PROJECTS) ---
 
-// 1. Отримання всіх об'єктів
-app.get('/objects', authenticateToken, async (req, res) => {
+// 1. Отримання всіх проєктів
+app.get('/projects', authenticateToken, async (req, res) => {
   try {
     const { data, error } = await supabase
-      .from('objects')
+      .from('projects')
       .select('*')
       .order('created_at', { ascending: false });
 
@@ -41,31 +41,36 @@ app.get('/objects', authenticateToken, async (req, res) => {
   }
 });
 
-// 2. Створення нового об'єкта
-app.post('/objects', authenticateToken, async (req, res) => {
+// 2. Створення нового проєкту
+app.post('/projects', authenticateToken, async (req, res) => {
   try {
     const { data, error } = await supabase
-      .from('objects')
+      .from('projects')
       .insert([req.body])
       .select();
 
-    if (error) throw error;
+    if (error) {
+      if (error.code === '23505') {
+        return res.status(409).json({ error: 'Проєкт з таким номером уже існує!' });
+      }
+      throw error;
+    }
     res.json({ success: true, data: data[0] });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-// --- РОБОТА З ВИРОБАМИ (ORDER ITEMS) ---
+// --- РОБОТА З ВИРОБАМИ (PROJECT ITEMS) ---
 
-// 1. Отримання виробів (опціонально фільтр за order_id)
-app.get('/order_items', authenticateToken, async (req, res) => {
+// 1. Отримання виробів проєкту (фільтр за project_id)
+app.get('/project_items', authenticateToken, async (req, res) => {
   try {
-    const { order_id } = req.query;
-    let query = supabase.from('order_items').select('*');
+    const { project_id } = req.query;
+    let query = supabase.from('project_items').select('*');
 
-    if (order_id) {
-      query = query.eq('order_id', order_id);
+    if (project_id) {
+      query = query.eq('project_id', project_id);
     }
 
     const { data, error } = await query.order('full_job_number', { ascending: true });
@@ -77,13 +82,13 @@ app.get('/order_items', authenticateToken, async (req, res) => {
   }
 });
 
-// 2. Створення нового виробу (Лист Вводу)
-app.post('/order_items', authenticateToken, async (req, res) => {
+// 2. Створення нового виробу
+app.post('/project_items', authenticateToken, async (req, res) => {
   try {
     const { 
-      order_id, 
+      project_id, 
       type_code, 
-      display_name, // це приходить з Google Таблиці
+      display_name, 
       height, 
       width, 
       depth, 
@@ -91,12 +96,16 @@ app.post('/order_items', authenticateToken, async (req, res) => {
       ip_rating 
     } = req.body;
 
+    if (!project_id || !display_name) {
+      return res.status(400).json({ error: 'Missing project_id or display_name' });
+    }
+
     const { data, error } = await supabase
-      .from('order_items')
+      .from('project_items')
       .insert([{ 
-        order_id, // тут має бути UUID, який прийшов з Select-списку
+        project_id, 
         type_code, 
-        display_name, // тепер у базі ми його перейменували на display_name
+        display_name, 
         height: height ? parseInt(height) : null, 
         width: width ? parseInt(width) : null, 
         depth: depth ? parseInt(depth) : null,
@@ -107,16 +116,9 @@ app.post('/order_items', authenticateToken, async (req, res) => {
 
     if (error) throw error;
     res.json(data[0]);
-  } catch (err) {
-    console.error("Помилка:", err.message);
-    res.status(500).json({ error: err.message });
-  }
-});
 
-    // Повертаємо перший елемент масиву (створений об'єкт з full_job_number)
-    res.json(data[0]);
   } catch (err) {
-    console.error("Supabase Error:", err.message);
+    console.error("Sakura Error:", err.message);
     res.status(500).json({ error: err.message });
   }
 });
