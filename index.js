@@ -38,5 +38,16 @@ app.get('/order_items', authenticateToken, async (req, res) => {
 // Базовий перевірочний маршрут
 app.get('/', (req, res) => res.send('Sakura API is Live!'));
 
+// Маршрут для створення нового об'єкта
+app.post('/objects', authenticateToken, async (req, res) => {
+  const { data, error } = await supabase
+    .from('objects')
+    .insert([req.body])
+    .select();
+    
+  if (error) return res.status(500).json({ error: error.message });
+  res.json({ success: true, data: data[0] });
+});
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
