@@ -19,19 +19,19 @@ function authenticateToken(req, res, next) {
 }
 
 // --- БАЗОВІ МАРШРУТИ ---
-
 app.get('/', (req, res) => {
-  res.send('🌸 Sakura API is Live and Running with NEW Architecture!');
+  res.send('🌸 Sakura API: New Architecture with Archiving active!');
 });
 
 // --- РОБОТА З ПРОЄКТАМИ (PROJECTS) ---
 
-// 1. Отримання всіх проєктів
+// 1. Отримання проєктів (ТІЛЬКИ АКТИВНИХ)
 app.get('/projects', authenticateToken, async (req, res) => {
   try {
     const { data, error } = await supabase
       .from('projects')
       .select('*')
+      .eq('is_archived', false) // Приховуємо архівні
       .order('created_at', { ascending: false });
 
     if (error) throw error;
@@ -61,13 +61,30 @@ app.post('/projects', authenticateToken, async (req, res) => {
   }
 });
 
+// 3. Архівування проєкту (PATCH)
+app.patch('/projects/:id/archive', authenticateToken, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { data, error } = await supabase
+      .from('projects')
+      .update({ is_archived: true })
+      .eq('id', id)
+      .select();
+
+    if (error) throw error;
+    res.json({ success: true, message: "Проєкт перенесено в архів", data: data[0] });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // --- РОБОТА З ВИРОБАМИ (PROJECT ITEMS) ---
 
-// 1. Отримання виробів проєкту (фільтр за project_id)
+// 1. Отримання виробів (ТІЛЬКИ АКТИВНИХ)
 app.get('/project_items', authenticateToken, async (req, res) => {
   try {
     const { project_id } = req.query;
-    let query = supabase.from('project_items').select('*');
+    let query = supabase.from('project_items').select('*').eq('is_archived', false);
 
     if (project_id) {
       query = query.eq('project_id', project_id);
@@ -116,9 +133,24 @@ app.post('/project_items', authenticateToken, async (req, res) => {
 
     if (error) throw error;
     res.json(data[0]);
-
   } catch (err) {
-    console.error("Sakura Error:", err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// 3. Архівування виробу (PATCH)
+app.patch('/project_items/:id/archive', authenticateToken, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { data, error } = await supabase
+      .from('project_items')
+      .update({ is_archived: true })
+      .eq('id', id)
+      .select();
+
+    if (error) throw error;
+    res.json({ success: true, message: "Виріб архівовано", data: data[0] });
+  } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
@@ -127,30 +159,4 @@ app.post('/project_items', authenticateToken, async (req, res) => {
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`🚀 Server is running on port ${PORT}`);
-});
-
-// Архівування проєкту
-app.patch('/projects/:id/archive', authenticateToken, async (req, res) => {
-  const { id } = req.params;
-  const { data, error } = await supabase
-    .from('projects')
-    .update({ is_archived: true })
-    .eq('id', id)
-    .select();
-
-  if (error) return res.status(500).json({ error: error.message });
-  res.json({ success: true, message: "Проєкт перенесено в архів", data });
-});
-
-// Архівування конкретного виробу
-app.patch('/project_items/:id/archive', authenticateToken, async (req, res) => {
-  const { id } = req.params;
-  const { data, error } = await supabase
-    .from('project_items')
-    .update({ is_archived: true })
-    .eq('id', id)
-    .select();
-
-  if (error) return res.status(500).json({ error: error.message });
-  res.json({ success: true, message: "Виріб архівовано", data });
 });
