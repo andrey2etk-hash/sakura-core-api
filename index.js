@@ -51,3 +51,28 @@ app.post('/objects', authenticateToken, async (req, res) => {
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+
+// Маршрут для створення НОВОГО ВИРОБУ (Лист Вводу)
+app.post('/order_items', authenticateToken, async (req, res) => {
+  const { order_id, type_code, display_name, height, width, depth } = req.body;
+
+  const { data, error } = await supabase
+    .from('order_items')
+    .insert([{ 
+      order_id, 
+      type_code, 
+      display_name, 
+      height: parseInt(height), 
+      width: parseInt(width), 
+      depth: parseInt(depth) 
+    }])
+    .select(); // select() обов'язковий, щоб повернути згенерований full_job_number
+
+  if (error) {
+    console.error("Supabase Error:", error.message);
+    return res.status(500).json({ error: error.message });
+  }
+
+  // Повертаємо створений об'єкт, де вже буде full_job_number (завдяки тригеру в БД)
+  res.json(data[0]);
+});
