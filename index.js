@@ -52,3 +52,17 @@ app.get('/objects', async (req, res) => {
 });
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Sakura API running on port ${PORT}`));
+
+// Додай це в index.js після маршруту /objects
+app.get('/order_items', authenticateToken, async (req, res) => {
+  const { order_id } = req.query;
+  let query = supabase.from('order_items').select('*');
+  
+  if (order_id) {
+    query = query.eq('order_id', order_id);
+  }
+  
+  const { data, error } = await query;
+  if (error) return res.status(500).json({ error: error.message });
+  res.json(data);
+});
