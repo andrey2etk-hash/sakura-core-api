@@ -54,7 +54,7 @@ app.post('/order_items', authenticateToken, async (req, res) => {
     display_name, 
     height, 
     width, 
-    depth, 
+    depth,    // <- має бути 'depth'
     mass_kg, 
     ip_rating 
   } = req.body;
@@ -67,11 +67,11 @@ app.post('/order_items', authenticateToken, async (req, res) => {
       display_name, 
       height: height ? parseInt(height) : null, 
       width: width ? parseInt(width) : null, 
-      depth: depth ? parseInt(depth) : null,
+      depth: depth ? parseInt(depth) : null, // <- записуємо в 'depth'
       mass_kg: mass_kg ? parseInt(mass_kg) : null,
       ip_rating: ip_rating || 'IP00'
     }])
-    .select(); // Повертає об'єкт вже з full_job_number від тригера
+    .select();
 
   if (error) {
     console.error("Supabase Error:", error.message);
@@ -80,9 +80,3 @@ app.post('/order_items', authenticateToken, async (req, res) => {
 
   res.json(data[0]);
 });
-
-// БАЗОВІ МАРШРУТИ
-app.get('/', (req, res) => res.send('Sakura API is Live!'));
-
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
