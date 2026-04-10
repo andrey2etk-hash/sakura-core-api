@@ -23,15 +23,14 @@ app.get('/', (req, res) => {
   res.send('🌸 Sakura API: New Architecture with Archiving active!');
 });
 
-// --- РОБОТА З ПРОЄКТАМИ (PROJECTS) ---
+// --- РОБОТА З ПРОЄКТАМИ ---
 
-// 1. Отримання проєктів (ТІЛЬКИ АКТИВНИХ)
 app.get('/projects', authenticateToken, async (req, res) => {
   try {
     const { data, error } = await supabase
       .from('projects')
       .select('*')
-      .eq('is_archived', false) // Приховуємо архівні
+      .eq('is_archived', false)
       .order('created_at', { ascending: false });
 
     if (error) throw error;
@@ -41,7 +40,6 @@ app.get('/projects', authenticateToken, async (req, res) => {
   }
 });
 
-// 2. Створення нового проєкту
 app.post('/projects', authenticateToken, async (req, res) => {
   try {
     const { data, error } = await supabase
@@ -61,7 +59,6 @@ app.post('/projects', authenticateToken, async (req, res) => {
   }
 });
 
-// 3. Архівування проєкту (PATCH)
 app.patch('/projects/:id/archive', authenticateToken, async (req, res) => {
   try {
     const { id } = req.params;
@@ -78,9 +75,8 @@ app.patch('/projects/:id/archive', authenticateToken, async (req, res) => {
   }
 });
 
-// --- РОБОТА З ВИРОБАМИ (PROJECT ITEMS) ---
+// --- РОБОТА З ВИРОБАМИ ---
 
-// 1. Отримання виробів (ТІЛЬКИ АКТИВНИХ)
 app.get('/project_items', authenticateToken, async (req, res) => {
   try {
     const { project_id } = req.query;
@@ -91,7 +87,6 @@ app.get('/project_items', authenticateToken, async (req, res) => {
     }
 
     const { data, error } = await query.order('full_job_number', { ascending: true });
-    
     if (error) throw error;
     res.json(data);
   } catch (err) {
@@ -99,24 +94,12 @@ app.get('/project_items', authenticateToken, async (req, res) => {
   }
 });
 
-// 2. Створення нового виробу
 app.post('/project_items', authenticateToken, async (req, res) => {
   try {
-    const { 
-      project_id, 
-      type_code, 
-      display_name, 
-      height, 
-      width, 
-      depth, 
-      mass_kg, 
-      ip_rating 
-    } = req.body;
-
+    const { project_id, type_code, display_name, height, width, depth, mass_kg, ip_rating } = req.body;
     if (!project_id || !display_name) {
       return res.status(400).json({ error: 'Missing project_id or display_name' });
     }
-
     const { data, error } = await supabase
       .from('project_items')
       .insert([{ 
@@ -130,7 +113,6 @@ app.post('/project_items', authenticateToken, async (req, res) => {
         ip_rating: ip_rating || 'IP00'
       }])
       .select();
-
     if (error) throw error;
     res.json(data[0]);
   } catch (err) {
@@ -138,7 +120,6 @@ app.post('/project_items', authenticateToken, async (req, res) => {
   }
 });
 
-// 3. Архівування виробу (PATCH)
 app.patch('/project_items/:id/archive', authenticateToken, async (req, res) => {
   try {
     const { id } = req.params;
@@ -147,7 +128,6 @@ app.patch('/project_items/:id/archive', authenticateToken, async (req, res) => {
       .update({ is_archived: true })
       .eq('id', id)
       .select();
-
     if (error) throw error;
     res.json({ success: true, message: "Виріб архівовано", data: data[0] });
   } catch (err) {
@@ -155,16 +135,15 @@ app.patch('/project_items/:id/archive', authenticateToken, async (req, res) => {
   }
 });
 
-// --- КЕРУВАННЯ КОРИСТУВАЧАМИ (Створення та оновлення) ---
+// --- КЕРУВАННЯ КОРИСТУВАЧАМИ ---
+
 app.post('/user-permissions', authenticateToken, async (req, res) => {
   try {
     const { email, role, tenant_id, options } = req.body;
-
     if (!email || !role || !tenant_id) {
       return res.status(400).json({ error: 'Missing email, role or tenant_id' });
     }
 
-    // Використовуємо upsert: якщо юзер є — оновити, якщо немає — створити
     const { data, error } = await supabase
       .from('user_permissions')
       .upsert({ 
@@ -183,27 +162,31 @@ app.post('/user-permissions', authenticateToken, async (req, res) => {
   }
 });
 
-// ЗАПУСК СЕРВЕРА
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`🚀 Server is running on port ${PORT}`);
-});
-
-// --- АВТОРИЗАЦІЯ ТА РОЛІ ---
+// --- АВТОРИЗАЦІЯ ТА РОЛІ (З ПЕРЕВІРКОЮ БЛОКУВАННЯ) ---
 app.get('/get-user-access', authenticateToken, async (req, res) => {
   try {
-    const { email } = req.query; // Отримуємо email з запиту
+    const { email } = req.query;
     if (!email) return res.status(400).json({ error: 'Email is required' });
+
+    const normalizedEmail = email.toLowerCase().trim();
 
     const { data, error } = await supabase
       .from('user_permissions')
       .select('role, options')
-      .eq('email', email)
+      .eq('email', normalizedEmail)
       .single();
 
     if (error || !data) {
-      // Якщо юзера немає в базі, даємо роль за замовчуванням (гість)
       return res.json({ role: 'guest', options: {} });
+    }
+
+    // ПЕРЕВІРКА БЛОКУВАННЯ В JSON ПЕРЕД ВІДПРАВКОЮ
+    if (data.options && data.options.disabled === true) {
+      return res.json({ 
+        role: 'guest', 
+        options: data.options, 
+        message: 'Access blocked by administrator' 
+      });
     }
 
     res.json(data);
@@ -211,14 +194,24 @@ app.get('/get-user-access', authenticateToken, async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
-// Отримання всіх користувачів тенента
-app.get('/get-all-users', authenticateToken, async (req, res) => {
-  const { tenant_id } = req.query;
-  const { data, error } = await supabase
-    .from('user_permissions')
-    .select('*')
-    .eq('tenant_id', tenant_id);
 
-  if (error) return res.status(400).json({ error: error.message });
-  res.json(data);
+app.get('/get-all-users', authenticateToken, async (req, res) => {
+  try {
+    const { tenant_id } = req.query;
+    const { data, error } = await supabase
+      .from('user_permissions')
+      .select('*')
+      .eq('tenant_id', tenant_id);
+
+    if (error) throw error;
+    res.json(data);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
+// ЗАПУСК СЕРВЕРА
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`🚀 Server is running on port ${PORT}`);
 });
