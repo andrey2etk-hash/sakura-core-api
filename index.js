@@ -183,3 +183,14 @@ app.get('/get-user-access', authenticateToken, async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+// Отримання всіх користувачів тенента
+app.get('/get-all-users', authenticateToken, async (req, res) => {
+  const { tenant_id } = req.query;
+  const { data, error } = await supabase
+    .from('user_permissions')
+    .select('*')
+    .eq('tenant_id', tenant_id);
+
+  if (error) return res.status(400).json({ error: error.message });
+  res.json(data);
+});
