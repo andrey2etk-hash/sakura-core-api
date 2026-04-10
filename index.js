@@ -160,3 +160,26 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`🚀 Server is running on port ${PORT}`);
 });
+
+// --- АВТОРИЗАЦІЯ ТА РОЛІ ---
+app.get('/get-user-access', authenticateToken, async (req, res) => {
+  try {
+    const { email } = req.query; // Отримуємо email з запиту
+    if (!email) return res.status(400).json({ error: 'Email is required' });
+
+    const { data, error } = await supabase
+      .from('user_permissions')
+      .select('role, options')
+      .eq('email', email)
+      .single();
+
+    if (error || !data) {
+      // Якщо юзера немає в базі, даємо роль за замовчуванням (гість)
+      return res.json({ role: 'guest', options: {} });
+    }
+
+    res.json(data);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
