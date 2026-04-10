@@ -155,6 +155,34 @@ app.patch('/project_items/:id/archive', authenticateToken, async (req, res) => {
   }
 });
 
+// --- КЕРУВАННЯ КОРИСТУВАЧАМИ (Створення та оновлення) ---
+app.post('/user-permissions', authenticateToken, async (req, res) => {
+  try {
+    const { email, role, tenant_id, options } = req.body;
+
+    if (!email || !role || !tenant_id) {
+      return res.status(400).json({ error: 'Missing email, role or tenant_id' });
+    }
+
+    // Використовуємо upsert: якщо юзер є — оновити, якщо немає — створити
+    const { data, error } = await supabase
+      .from('user_permissions')
+      .upsert({ 
+        email: email.toLowerCase().trim(), 
+        role, 
+        tenant_id, 
+        options: options || {} 
+      }, { onConflict: ['email', 'tenant_id'] })
+      .select();
+
+    if (error) throw error;
+    res.json({ success: true, data: data[0] });
+  } catch (err) {
+    console.error("Помилка на сервері:", err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // ЗАПУСК СЕРВЕРА
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
