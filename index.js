@@ -201,3 +201,18 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`🚀 Server is running on port ${PORT}`);
 });
+
+// Додати в index.js
+const fs = require('fs');
+const path = require('path');
+
+app.get('/api/interface', (req, res) => {
+    const filePath = path.join(__dirname, 'src/main/resources/templates/Sidebar.html');
+    fs.readFile(filePath, 'utf8', (err, data) => {
+        if (err) {
+            return res.status(500).send('Помилка завантаження інтерфейсу');
+        }
+        res.set('Content-Type', 'text/html');
+        res.send(data);
+    });
+});
