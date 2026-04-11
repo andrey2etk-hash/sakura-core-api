@@ -20,7 +20,7 @@ function authenticateToken(req, res, next) {
 
 // --- БАЗОВІ МАРШРУТИ ---
 app.get('/', (req, res) => {
-  res.send('🌸 Sakura API: New Architecture with Archiving active!');
+  res.send('🌸 Sakura API: v1.10 | Personalization & full_name Support Active');
 });
 
 // --- РОБОТА З ПРОЄКТАМИ ---
@@ -120,26 +120,11 @@ app.post('/project_items', authenticateToken, async (req, res) => {
   }
 });
 
-app.patch('/project_items/:id/archive', authenticateToken, async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { data, error } = await supabase
-      .from('project_items')
-      .update({ is_archived: true })
-      .eq('id', id)
-      .select();
-    if (error) throw error;
-    res.json({ success: true, message: "Виріб архівовано", data: data[0] });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
 // --- КЕРУВАННЯ КОРИСТУВАЧАМИ ---
 
 app.post('/user-permissions', authenticateToken, async (req, res) => {
   try {
-    const { email, role, tenant_id, options } = req.body;
+    const { email, role, tenant_id, options, full_name } = req.body;
     if (!email || !role || !tenant_id) {
       return res.status(400).json({ error: 'Missing email, role or tenant_id' });
     }
@@ -150,6 +135,7 @@ app.post('/user-permissions', authenticateToken, async (req, res) => {
         email: email.toLowerCase().trim(), 
         role, 
         tenant_id, 
+        full_name, // Тепер ім'я зберігається при створенні/оновленні
         options: options || {} 
       }, { onConflict: ['email', 'tenant_id'] })
       .select();
@@ -162,7 +148,7 @@ app.post('/user-permissions', authenticateToken, async (req, res) => {
   }
 });
 
-// --- АВТОРИЗАЦІЯ ТА РОЛІ (З ПЕРЕВІРКОЮ БЛОКУВАННЯ) ---
+// --- АВТОРИЗАЦІЯ ТА РОЛІ (З ПІДТРИМКОЮ ПІБ) ---
 app.get('/get-user-access', authenticateToken, async (req, res) => {
   try {
     const { email } = req.query;
@@ -172,7 +158,7 @@ app.get('/get-user-access', authenticateToken, async (req, res) => {
 
     const { data, error } = await supabase
       .from('user_permissions')
-      .select('role, options')
+      .select('role, options, full_name') // ЯВНО ДОДАНО full_name
       .eq('email', normalizedEmail)
       .single();
 
@@ -180,7 +166,7 @@ app.get('/get-user-access', authenticateToken, async (req, res) => {
       return res.json({ role: 'guest', options: {} });
     }
 
-    // ПЕРЕВІРКА БЛОКУВАННЯ В JSON ПЕРЕД ВІДПРАВКОЮ
+    // ПЕРЕВІРКА БЛОКУВАННЯ
     if (data.options && data.options.disabled === true) {
       return res.json({ 
         role: 'guest', 
@@ -189,7 +175,7 @@ app.get('/get-user-access', authenticateToken, async (req, res) => {
       });
     }
 
-    res.json(data);
+    res.json(data); // Тепер об'єкт містить full_name
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -200,7 +186,7 @@ app.get('/get-all-users', authenticateToken, async (req, res) => {
     const { tenant_id } = req.query;
     const { data, error } = await supabase
       .from('user_permissions')
-      .select('*')
+      .select('*') // Тут full_name підтягнеться автоматично
       .eq('tenant_id', tenant_id);
 
     if (error) throw error;
