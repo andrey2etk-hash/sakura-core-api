@@ -9,7 +9,7 @@ app.use(express.json());
 // Підключення до Supabase
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
 
-// МІДЛВЕР ДЛЯ ПЕРЕВІРКИ ТОКЕНА (для адмінських дій)
+// МІДЛВЕР ДЛЯ ПЕРЕВІРКИ ТОКЕНА (адмін-функції)
 function authenticateToken(req, res, next) {
   const token = req.headers['authorization'] || req.headers['x-api-key'];
   const expectedToken = process.env.API_KEY;
@@ -21,10 +21,10 @@ function authenticateToken(req, res, next) {
 
 // --- БАЗОВІ МАРШРУТИ ---
 app.get('/', (req, res) => {
-  res.send('🌸 Sakura API: v1.15 | Production Ready');
+  res.send('🌸 Sakura API: v1.50 | Modular Interface Active');
 });
 
-// --- АВТОРИЗАЦІЯ (Відкритий маршрут для Бібліотеки) ---
+// --- АВТОРИЗАЦІЯ (Викликається з Google Apps Script) ---
 app.get('/get-user', async (req, res) => {
   try {
     const { email, tenant_id } = req.query;
@@ -40,24 +40,47 @@ app.get('/get-user', async (req, res) => {
     if (error || !data) {
       return res.json({ full_name: 'Гість', role: 'GUEST', options: {} });
     }
-
     res.json(data);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-// --- ІНТЕРФЕЙС (Для завантаження Sidebar) ---
+// --- ІНТЕРФЕЙС (Збірка "по методичці" з трьох файлів) ---
 app.get('/api/interface', (req, res) => {
-  const filePath = path.join(__dirname, 'src/main/resources/templates/Sidebar.html');
-  fs.readFile(filePath, 'utf8', (err, data) => {
-    if (err) return res.status(500).send('Помилка завантаження інтерфейсу');
-    res.set('Content-Type', 'text/html');
-    res.send(data);
-  });
+    // Вказуємо шлях до вашої папки з шаблонами
+    const dir = path.join(__dirname, 'src/main/resources/templates');
+    
+    try {
+        // Читаємо окремі модулі
+        const html = fs.readFileSync(path.join(dir, 'sidebar.html'), 'utf8');
+        const css = fs.readFileSync(path.join(dir, 'style.css'), 'utf8');
+        const js = fs.readFileSync(path.join(dir, 'script.js'), 'utf8');
+
+        // Склеюємо в один файл для Google Apps Script
+        const fullContent = `
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <base target="_top">
+                <style>${css}</style>
+            </head>
+            <body>
+                ${html}
+                <script>${js}</script>
+            </body>
+            </html>
+        `;
+        
+        res.set('Content-Type', 'text/html');
+        res.send(fullContent);
+    } catch (err) {
+        console.error("Помилка збірки інтерфейсу:", err);
+        res.status(500).send('Помилка сервера при збірці файлів інтерфейсу');
+    }
 });
 
-// --- РОБОТА З ПРОЄКТАМИ (Захищено токеном) ---
+// --- РОБОТА З ПРОЄКТАМИ (Дані для Журналу Виробництва) ---
 app.get('/projects', authenticateToken, async (req, res) => {
   try {
     const { data, error } = await supabase
@@ -65,6 +88,7 @@ app.get('/projects', authenticateToken, async (req, res) => {
       .select('*')
       .eq('is_archived', false)
       .order('created_at', { ascending: false });
+    
     if (error) throw error;
     res.json(data);
   } catch (err) {
@@ -72,7 +96,7 @@ app.get('/projects', authenticateToken, async (req, res) => {
   }
 });
 
-// --- КЕРУВАННЯ КОРИСТУВАЧАМИ (Захищено токеном) ---
+// --- КЕРУВАННЯ КОРИСТУВАЧАМИ ---
 app.post('/user-permissions', authenticateToken, async (req, res) => {
   try {
     const { email, role, tenant_id, options, full_name } = req.body;
@@ -86,6 +110,7 @@ app.post('/user-permissions', authenticateToken, async (req, res) => {
         options: options || {} 
       }, { onConflict: ['email', 'tenant_id'] })
       .select();
+    
     if (error) throw error;
     res.json({ success: true, data: data[0] });
   } catch (err) {
@@ -93,8 +118,8 @@ app.post('/user-permissions', authenticateToken, async (req, res) => {
   }
 });
 
-// ЗАПУСК СЕРВЕРА
+// ЗАПУСК
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log(`🚀 Sakura Server active on port ${PORT}`);
+  console.log(`🚀 Sakura Server (Modular) active on port ${PORT}`);
 });
