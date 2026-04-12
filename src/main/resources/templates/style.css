@@ -74,3 +74,25 @@ body {
 /* ОСНОВНИЙ КОНТЕНТ */
 .main-content { position: absolute; top: 382px; left: 0; right: 0; bottom: 0; overflow-y: auto; padding: 12px; }
 #admin-sub-production { display: none; }
+
+/* Сигнальний колір для активного процесу */
+.status-loading {
+  color: #FFBF00 !important; /* Amber колір */
+  font-weight: bold;
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.5; }
+  100% { opacity: 1; }
+}
+
+/* Стиль для системних повідомлень у контенті */
+.info-msg {
+  font-size: 11px;
+  color: var(--gray-light);
+  border-left: 2px solid var(--sakura);
+  padding-left: 8px;
+  margin-top: 10px;
+}
