@@ -71,7 +71,7 @@ app.get('/test-ping', async (req, res) => {
       .from('projects')
       .insert([
         { 
-          name: 'ТЕСТ ЗВ'ЯЗКУ', 
+          name: "ТЕСТ ЗВ'ЯЗКУ", // Тепер у подвійних лапках
           tenant_id: '859f518e-49b8-402b-a396-8488e390c500',
           status: 'testing'
         }
