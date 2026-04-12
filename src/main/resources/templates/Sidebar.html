@@ -1,169 +1,41 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <base target="_top">
-  <style>
-    :root {
-      --sakura: #6A30A8; 
-      --border: #e1d9f1;
-      --text-dark: #3c4043;
-      --gray-light: #9aa0a6;
-      --system-bg: #f0f4fa;
-      --danger: #d93025; 
-    }
-
-    body { 
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      margin: 0; padding: 0; background: transparent; overflow: hidden;
-      user-select: none; -webkit-user-select: none;
-    }
-
-    .static-top {
-      position: absolute; top: 0; left: 0; right: 0;
-      height: 145px; background: var(--system-bg); z-index: 100;
-      border-bottom: 1px solid #d0d7de;
-    }
-
-    .header {
-      display: flex; justify-content: space-between; align-items: center;
-      height: 80px; padding: 0 15px; border-bottom: 1px solid #d0d7de;
-    }
-    .logo-img { height: 54px; width: auto; }
-    .header-info { display: flex; flex-direction: column; align-items: flex-end; margin-top: 28px; }
-    .version-tag { font-size: 9px; color: var(--gray-light); font-weight: bold; }
-    .copyright-tag { font-size: 11px; color: var(--gray-light); }
-
-    .user-meta-box { padding: 8px 15px; background: var(--system-bg); }
-    .user-line { font-size: 10px; line-height: 1.4; display: flex; gap: 5px; }
-    .user-line b { color: var(--sakura); text-transform: uppercase; font-size: 9px; min-width: 85px; }
-    .user-line span { color: var(--text-dark); font-weight: 600; }
-
-    #pay-row { display: none; }
-    .pay-critical { color: var(--danger) !important; text-decoration: underline; }
-
-    .menu-scroll-area { 
-      position: absolute; top: 145px; left: 0; right: 0;
-      height: 235px; overflow-y: scroll; overflow-x: hidden;
-      background: transparent; border-bottom: 2px solid var(--sakura);
-      cursor: default;
-    }
-
-    .menu-scroll-area::-webkit-scrollbar { width: 4px; }
-    .menu-scroll-area::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
-
-    .acc-item {
-      cursor: pointer; padding: 10px 20px; font-size: 13px; font-weight: 400; 
-      color: var(--text-dark); transition: all 0.2s ease; white-space: nowrap;
-    }
-    .acc-item:hover { color: var(--sakura); padding-left: 25px; font-weight: 600; }
-    .acc-item.active { color: var(--sakura); font-weight: 700; padding-left: 30px; }
-
-    .submenu { max-height: 0; overflow: hidden; transition: max-height 0.4s ease; padding-left: 30px; }
-    .submenu.open { max-height: 200px; margin-bottom: 5px; }
-
-    .sub-link { padding: 8px 0; font-size: 11px; display: block; color: var(--gray-light); cursor: pointer; transition: 0.2s; }
-    .sub-link:hover { color: var(--sakura); padding-left: 5px; }
-    .sub-link.active { color: var(--sakura); font-weight: 700; padding-left: 8px; }
-
-    .main-content { position: absolute; top: 380px; left: 0; right: 0; bottom: 0; overflow-y: auto; padding: 15px; }
-    #admin-sub-production { display: none; }
-  </style>
-</head>
-<body>
-
-  <div class="static-top">
-    <div class="header">
-      <img src="https://drive.google.com/thumbnail?id=1QIp2_KURP7v3i4o6-eda3A-mAJh22CTi&sz=w400" class="logo-img">
-      <div class="header-info">
-        <div class="version-tag">v1.46</div>
-        <div class="copyright-tag">© Sakura Core 2026</div>
-      </div>
+<div class="static-top">
+  <div class="header">
+    <img src="https://drive.google.com/thumbnail?id=1QIp2_KURP7v3i4o6-eda3A-mAJh22CTi&sz=w400" class="logo-img">
+    <div class="header-info">
+      <div class="version-tag">v1.47</div>
+      <div class="copyright-tag">© Sakura Core 2026</div>
     </div>
-    <div class="user-meta-box">
-      <div class="user-line"><b>КОРИСТУВАЧ:</b> <span id="display-user">Завантаження...</span></div>
-      <div class="user-line"><b>РОЛЬ:</b> <span id="display-role">...</span></div>
-      <div class="user-line" id="pay-row"><b>ОПЛАТА ЧЕРЕЗ:</b> <span id="display-pay">...</span></div>
+  </div>
+  <div class="user-meta-box">
+    <div class="user-line"><b>КОРИСТУВАЧ:</b> <span id="display-user">Завантаження...</span></div>
+    <div class="user-line"><b>РОЛЬ:</b> <span id="display-role">...</span></div>
+    <div class="user-line" id="pay-row"><b>ОПЛАТА ЧЕРЕЗ:</b> <span id="display-pay">...</span></div>
+  </div>
+</div>
+
+<div class="menu-scroll-area">
+  <div class="acc-item" onclick="toggleAcc(this, 'sub-journal')">ЖУРНАЛ ВИРОБНИЦТВА</div>
+  <div id="sub-journal" class="submenu">
+    <div class="sub-link" onclick="handleSubClick(this, 'refresh-journal')">Оновити журнал</div>
+    <div id="admin-sub-production">
+      <div class="sub-link" onclick="handleSubClick(this, 'add-obj')">Додати об'єкт</div>
+      <div class="sub-link" onclick="handleSubClick(this, 'edit-obj')">Редагувати об'єкт</div>
+      <div class="sub-link" onclick="handleSubClick(this, 'delete-obj')">Видалити об'єкт</div>
+      <div class="sub-link" onclick="handleSubClick(this, 'config-journal')">Налаштувати журнал</div>
     </div>
   </div>
 
-  <div class="menu-scroll-area">
-    <div class="acc-item" onclick="toggleAcc(this, 'sub-journal')">ЖУРНАЛ ВИРОБНИЦТВА</div>
-    <div id="sub-journal" class="submenu">
-      <div class="sub-link" onclick="handleSubClick(this, 'refresh-journal')">└ Оновити журнал</div>
-      <div id="admin-sub-production">
-        <div class="sub-link" onclick="handleSubClick(this, 'add-obj')">└ Додати об'єкт</div>
-        <div class="sub-link" onclick="handleSubClick(this, 'edit-obj')">└ Редагувати об'єкт</div>
-        <div class="sub-link" onclick="handleSubClick(this, 'delete-obj')">└ Видалити об'єкт</div>
-        <div class="sub-link" onclick="handleSubClick(this, 'config-journal')">└ Налаштувати журнал</div>
-      </div>
-    </div>
-
-    <div class="acc-item" onclick="toggleAcc(this, 'sub-warehouse')">СКЛАД ТА СТАТУСИ</div>
-    <div id="sub-warehouse" class="submenu">
-      <div class="sub-link" onclick="handleSubClick(this, 'view-stock')">└ Список залишків</div>
-      <div class="sub-link" onclick="handleSubClick(this, 'set-status')">└ Оновити статус</div>
-    </div>
-
-    <div id="acc-admin-main" class="acc-item" style="display:none;" onclick="toggleAcc(this, 'sub-admin')">АДМІНІСТРУВАННЯ</div>
-    <div id="sub-admin" class="submenu">
-      <div class="sub-link" onclick="handleSubClick(this, 'adm-users')">└ Користувачі</div>
-      <div class="sub-link" onclick="handleSubClick(this, 'adm-logs')">└ Логи системи</div>
-    </div>
+  <div class="acc-item" onclick="toggleAcc(this, 'sub-warehouse')">СКЛАД ТА СТАТУСИ</div>
+  <div id="sub-warehouse" class="submenu">
+    <div class="sub-link" onclick="handleSubClick(this, 'view-stock')">Список залишків</div>
+    <div class="sub-link" onclick="handleSubClick(this, 'set-status')">Оновити статус</div>
   </div>
 
-  <div class="main-content"><div id="content-container">Оберіть дію в меню.</div></div>
+  <div id="acc-admin-main" class="acc-item" style="display:none;" onclick="toggleAcc(this, 'sub-admin')">АДМІНІСТРУВАННЯ</div>
+  <div id="sub-admin" class="submenu">
+    <div class="sub-link" onclick="handleSubClick(this, 'adm-users')">Користувачі</div>
+    <div class="sub-link" onclick="handleSubClick(this, 'adm-logs')">Логи системи</div>
+  </div>
+</div>
 
-<script>
-  window.onload = function() {
-    google.script.run
-      .withSuccessHandler(function(userData) {
-        if (!userData) return;
-        document.getElementById('display-user').textContent = userData.name;
-        document.getElementById('display-role').textContent = userData.role;
-
-        const role = (userData.role || "").toUpperCase();
-        const isAdmin = ['ADMIN', 'DIRECTOR', 'DISPATCHER'].includes(role);
-
-        if (isAdmin) {
-          document.getElementById('admin-sub-production').style.display = 'block';
-          document.getElementById('acc-admin-main').style.display = 'block';
-          const payRow = document.getElementById('pay-row');
-          if (payRow) {
-            payRow.style.display = 'flex';
-            document.getElementById('display-pay').innerText = userData.daysLeftStr;
-          }
-        }
-      })
-      .getUserData();
-  };
-
-  function toggleAcc(el, submenuId) {
-    const submenu = document.getElementById(submenuId);
-    if (!submenu) return;
-    const wasOpen = submenu.classList.contains('open');
-    document.querySelectorAll('.submenu').forEach(s => s.classList.remove('open'));
-    document.querySelectorAll('.acc-item').forEach(i => i.classList.remove('active'));
-    if (!wasOpen) { 
-      submenu.classList.add('open'); 
-      el.classList.add('active'); 
-    }
-  }
-
-  function handleSubClick(el, id) {
-    document.querySelectorAll('.sub-link').forEach(link => link.classList.remove('active'));
-    el.classList.add('active');
-    
-    if (id === 'refresh-journal') {
-      document.getElementById('content-container').innerHTML = "<i>Оновлення журналу...</i>";
-      google.script.run
-        .withSuccessHandler(function(res) {
-          document.getElementById('content-container').innerText = res;
-        })
-        .refreshProductionJournal();
-    } else {
-      document.getElementById('content-container').innerText = "Активний модуль: " + id;
-    }
-  }
-</script>
-</body>
-</html>
+<div class="main-content"><div id="content-container">Оберіть дію в меню.</div></div>
