@@ -1,17 +1,16 @@
 :root {
   --sakura: #6A30A8; 
   --border: #e1d9f1;
-  --text-dark: #3c4043; /* Ваш базовий темно-сірий */
+  --text-dark: #3c4043; /* ТЕМНО-СІРИЙ ДЛЯ ВСЬОГО */
   --gray-light: #9aa0a6;
   --system-bg: #f0f4fa;
   --danger: #d93025; 
-  --signal: #D84315; /* Deep Orange для активного стану */
+  --signal: #D84315; 
 }
 
 body { 
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   margin: 0; padding: 0; background: transparent; overflow: hidden;
-  user-select: none; -webkit-user-select: none;
 }
 
 .static-top {
@@ -30,66 +29,49 @@ body {
 .copyright-tag { font-size: 11px; color: var(--gray-light); }
 
 .user-meta-box { padding: 6px 15px; background: var(--system-bg); }
-.user-line { font-size: 10px; line-height: 1.3; display: flex; gap: 5px; }
-
-/* ТЕПЕР ТУТ ТЕМНО-СІРИЙ */
-.user-line b { color: var(--text-dark); text-transform: uppercase; font-size: 9px; min-width: 80px; }
-.user-line span { color: var(--text-dark); font-weight: 600; }
+.user-line { font-size: 10px; line-height: 1.3; display: flex; gap: 5px; color: var(--text-dark); }
+.user-line b { text-transform: uppercase; font-size: 9px; min-width: 80px; color: var(--text-dark); }
+.user-line span { font-weight: 600; color: var(--text-dark); }
 
 #pay-row { display: none; }
-.pay-critical { color: var(--danger) !important; text-decoration: underline; }
 
 .menu-scroll-area { 
   position: absolute; top: 140px; left: 0; right: 0;
-  height: 240px; overflow-y: scroll; overflow-x: hidden;
+  height: 240px; overflow-y: auto; overflow-x: hidden;
   background: transparent; border-bottom: 2px solid var(--sakura);
 }
 
 .acc-item {
   cursor: pointer; padding: 6px 15px; font-size: 13px; font-weight: 400; 
-  color: var(--text-dark); transition: all 0.15s ease; white-space: nowrap;
+  color: var(--text-dark); transition: 0.2s;
 }
-.acc-item:hover { color: var(--sakura); padding-left: 20px; font-weight: 600; }
+.acc-item:hover { color: var(--sakura); padding-left: 20px; }
 .acc-item.active { color: var(--sakura); font-weight: 700; padding-left: 25px; }
 
-.submenu { 
-  max-height: 0; overflow: hidden; transition: max-height 0.3s ease; 
-  padding-left: 25px; 
-}
-.submenu.open { max-height: 180px; margin-bottom: 3px; }
+.submenu { max-height: 0; overflow: hidden; transition: 0.3s; padding-left: 25px; }
+.submenu.open { max-height: 200px; margin-bottom: 5px; }
 
-.sub-link { 
-  padding: 2px 0; font-size: 12px; display: block; 
-  color: var(--gray-light); cursor: pointer; transition: 0.15s; 
-}
-.sub-link:hover { color: var(--sakura); padding-left: 4px; }
-.sub-link.active { color: var(--sakura); font-weight: 700; padding-left: 6px; }
+.sub-link { padding: 3px 0; font-size: 12px; display: block; color: var(--gray-light); cursor: pointer; }
+.sub-link:hover { color: var(--sakura); }
+.sub-link.active { color: var(--sakura); font-weight: 700; }
 
-.status-loading {
-  color: var(--signal) !important;
-  font-weight: bold;
-}
+.status-loading { color: var(--signal) !important; font-weight: bold; }
 
-/* СТАТУС БЛОК БЕЗ ПАЛКИ */
+/* ТУТ ТІЛЬКИ СПІНЕР, БЕЗ ПАЛОК */
 .info-status-block {
   display: flex; align-items: center; gap: 10px;
   font-size: 11px; color: var(--gray-light);
-  padding: 8px 0; margin-top: 5px;
+  margin-top: 10px;
 }
 
-/* ПЛАВНИЙ СПІНЕР */
 .spinner {
   width: 14px; height: 14px;
-  border: 2px solid #e1e1e1;
+  border: 2px solid #ddd;
   border-top: 2px solid var(--sakura);
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }
 
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
+@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
 .main-content { position: absolute; top: 382px; left: 0; right: 0; bottom: 0; overflow-y: auto; padding: 12px; }
-#admin-sub-production { display: none; }
