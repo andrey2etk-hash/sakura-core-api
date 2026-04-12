@@ -6,30 +6,23 @@ const path = require('path');
 const app = express();
 app.use(express.json());
 
-// Підключення до Supabase
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
 
-// МІДЛВЕР ДЛЯ ПЕРЕВІРКИ ТОКЕНА (адмін-функції)
 function authenticateToken(req, res, next) {
   const token = req.headers['authorization'] || req.headers['x-api-key'];
   const expectedToken = process.env.API_KEY;
-  if (token === `Bearer ${expectedToken}` || token === expectedToken) {
-    return next();
-  }
+  if (token === `Bearer ${expectedToken}` || token === expectedToken) return next();
   return res.status(401).json({ error: 'Unauthorized' });
 }
 
-// --- БАЗОВІ МАРШРУТИ ---
 app.get('/', (req, res) => {
-  res.send('🌸 Sakura API: v1.50 | Modular Interface Active');
+  res.send('🌸 Sakura API: v1.50 | Modular Active');
 });
 
-// --- АВТОРИЗАЦІЯ (Викликається з Google Apps Script) ---
+// Маршрут для отримання даних користувача
 app.get('/get-user', async (req, res) => {
   try {
     const { email, tenant_id } = req.query;
-    if (!email || !tenant_id) return res.status(400).json({ error: 'Missing email or tenant_id' });
-
     const { data, error } = await supabase
       .from('user_permissions')
       .select('role, options, full_name')
@@ -37,27 +30,21 @@ app.get('/get-user', async (req, res) => {
       .eq('tenant_id', tenant_id)
       .single();
 
-    if (error || !data) {
-      return res.json({ full_name: 'Гість', role: 'GUEST', options: {} });
-    }
+    if (error || !data) return res.json({ full_name: 'Гість', role: 'GUEST' });
     res.json(data);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
+  } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-// --- ІНТЕРФЕЙС (Збірка "по методичці" з трьох файлів) ---
+// --- ЗБІРКА ІНТЕРФЕЙСУ ПО МЕТОДИЧЦІ ---
 app.get('/api/interface', (req, res) => {
-    // Вказуємо шлях до вашої папки з шаблонами
+    // ВАЖЛИВО: Шлях до папки templates, де лежать ваші 3 файли
     const dir = path.join(__dirname, 'src/main/resources/templates');
     
     try {
-        // Читаємо окремі модулі
         const html = fs.readFileSync(path.join(dir, 'sidebar.html'), 'utf8');
         const css = fs.readFileSync(path.join(dir, 'style.css'), 'utf8');
         const js = fs.readFileSync(path.join(dir, 'script.js'), 'utf8');
 
-        // Склеюємо в один файл для Google Apps Script
         const fullContent = `
             <!DOCTYPE html>
             <html>
@@ -75,12 +62,12 @@ app.get('/api/interface', (req, res) => {
         res.set('Content-Type', 'text/html');
         res.send(fullContent);
     } catch (err) {
-        console.error("Помилка збірки інтерфейсу:", err);
-        res.status(500).send('Помилка сервера при збірці файлів інтерфейсу');
+        console.error("Build Error:", err);
+        res.status(500).send("Помилка збірки інтерфейсу: перевірте шляхи до файлів.");
     }
 });
 
-// --- РОБОТА З ПРОЄКТАМИ (Дані для Журналу Виробництва) ---
+// Маршрут для отримання проєктів
 app.get('/projects', authenticateToken, async (req, res) => {
   try {
     const { data, error } = await supabase
@@ -88,38 +75,10 @@ app.get('/projects', authenticateToken, async (req, res) => {
       .select('*')
       .eq('is_archived', false)
       .order('created_at', { ascending: false });
-    
     if (error) throw error;
     res.json(data);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
+  } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-// --- КЕРУВАННЯ КОРИСТУВАЧАМИ ---
-app.post('/user-permissions', authenticateToken, async (req, res) => {
-  try {
-    const { email, role, tenant_id, options, full_name } = req.body;
-    const { data, error } = await supabase
-      .from('user_permissions')
-      .upsert({ 
-        email: email.toLowerCase().trim(), 
-        role, 
-        tenant_id, 
-        full_name, 
-        options: options || {} 
-      }, { onConflict: ['email', 'tenant_id'] })
-      .select();
-    
-    if (error) throw error;
-    res.json({ success: true, data: data[0] });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-// ЗАПУСК
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`🚀 Sakura Server (Modular) active on port ${PORT}`);
-});
+app.listen(PORT, () => console.log(`🚀 Server active on port ${PORT}`));
