@@ -78,3 +78,13 @@ function handleSubClick(el, id) {
     container.innerHTML = "Модуль: " + id;
   }
 }
+function runTestPing() {
+  const container = document.getElementById('content-container');
+  container.innerHTML = "Відправка тестового сигналу...";
+  
+  google.script.run
+    .withSuccessHandler(function(res) {
+       container.innerHTML = "Результат: " + res;
+    })
+    .testSystemPing();
+}
