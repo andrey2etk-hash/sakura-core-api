@@ -6,10 +6,10 @@ const path = require('path');
 const app = express();
 app.use(express.json());
 
-// Підключення до бази
+// Підключення до бази Supabase
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
 
-// Мідлвар для безпеки (опційно)
+// Мідлвар безпеки (залишаємо структуру на майбутнє)
 function authenticateToken(req, res, next) {
   const token = req.headers['authorization'] || req.headers['x-api-key'];
   const expectedToken = process.env.API_KEY;
@@ -18,7 +18,7 @@ function authenticateToken(req, res, next) {
 }
 
 app.get('/', (req, res) => {
-  res.send('🌸 Sakura API: v1.60 | Delta Sync Active');
+  res.send('🌸 Sakura API: v1.70 | Simple Sync Active');
 });
 
 // 1. ОТРИМАННЯ ДАНИХ КОРИСТУВАЧА
@@ -51,45 +51,27 @@ app.get('/api/interface', (req, res) => {
   } catch (err) { res.status(500).send(`Помилка збірки ресурсів`); }
 });
 
-// 3. РОЗУМНИЙ МАРШРУТ ПРОЄКТІВ (DELTA UPDATE)
+// 3. СПРОЩЕНИЙ МАРШРУТ ПРОЄКТІВ (ПОВНИЙ ПЕРЕЗАПИС)
 app.get('/projects', async (req, res) => {
   try {
-    const { tenant_id, last_update } = req.query;
-    let query = supabase.from('projects').select('*');
-
-    if (tenant_id) query = query.eq('tenant_id', tenant_id);
-
-    // Якщо є дата — тягнемо все змінене (включаючи архівні для видалення в таблиці)
-    if (last_update && last_update !== "null") {
-      query = query.gt('updated_at', last_update);
-    } else {
-      // Якщо перше завантаження — тільки актуальні
-      query = query.eq('is_archived', false);
-    }
-
-    const { data, error } = await query.order('updated_at', { ascending: true });
-    if (error) throw error;
-    res.json(data);
-  } catch (err) { res.status(500).json({ error: err.message }); }
-});
-
-// 4. МАРШРУТ ДЛЯ ЗВІРКИ (RECONCILIATION)
-// Повертає лише список живих ID, щоб видалити те, що було видалено фізично
-app.get('/projects-ids', async (req, res) => {
-  try {
     const { tenant_id } = req.query;
+    
+    // Просто тягнемо ВСІ неархівні проекти для цього клієнта
     const { data, error } = await supabase
       .from('projects')
-      .select('object_number')
+      .select('*')
       .eq('tenant_id', tenant_id)
-      .eq('is_archived', false);
+      .eq('is_archived', false)
+      .order('created_at', { ascending: false });
 
     if (error) throw error;
-    res.json(data.map(item => item.object_number));
-  } catch (err) { res.status(500).json({ error: err.message }); }
+    res.json(data || []);
+  } catch (err) { 
+    res.status(500).json({ error: err.message }); 
+  }
 });
 
-// 5. ТЕСТОВИЙ ПІНГ
+// 4. ТЕСТОВИЙ ПІНГ (Для перевірки зв'язку)
 app.get('/test-ping', async (req, res) => {
   try {
     const { data, error } = await supabase
@@ -105,4 +87,4 @@ app.get('/test-ping', async (req, res) => {
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`🚀 Sakura API v1.60 Active on port ${PORT}`));
+app.listen(PORT, () => console.log(`🚀 Sakura API v1.70 Active on port ${PORT}`));
