@@ -63,3 +63,23 @@ app.get('/projects', async (req, res) => {
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`🚀 Server active on port ${PORT}`));
+
+// Тестовий маршрут для перевірки запису
+app.get('/test-ping', async (req, res) => {
+  try {
+    const { data, error } = await supabase
+      .from('projects')
+      .insert([
+        { 
+          name: 'ТЕСТ ЗВ'ЯЗКУ', 
+          tenant_id: '859f518e-49b8-402b-a396-8488e390c500',
+          status: 'testing'
+        }
+      ]);
+
+    if (error) throw error;
+    res.json({ message: "Сигнал дійшов до Supabase!" });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
