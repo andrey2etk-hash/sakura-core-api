@@ -19,7 +19,6 @@ app.get('/', (req, res) => {
   res.send('🌸 Sakura API: v1.50 | Modular Active');
 });
 
-// Маршрут для отримання даних користувача
 app.get('/get-user', async (req, res) => {
   try {
     const { email, tenant_id } = req.query;
@@ -29,68 +28,37 @@ app.get('/get-user', async (req, res) => {
       .eq('email', email.toLowerCase().trim())
       .eq('tenant_id', tenant_id)
       .single();
-
     if (error || !data) return res.json({ full_name: 'Гість', role: 'GUEST' });
     res.json(data);
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-// --- ЗБІРКА ІНТЕРФЕЙСУ ПО МЕТОДИЧЦІ ---
 app.get('/api/interface', (req, res) => {
     const dir = path.join(__dirname, 'src/main/resources/templates');
-    
     try {
         const html = fs.readFileSync(path.join(dir, 'Sidebar.html'), 'utf8');
         const css = fs.readFileSync(path.join(dir, 'style.css'), 'utf8');
         const js = fs.readFileSync(path.join(dir, 'script.js'), 'utf8');
-
-        const fullContent = `
-            <!DOCTYPE html>
-            <html>
-            <head>
-                <base target="_top">
-                <style>${css}</style>
-            </head>
-            <body>
-                ${html}
-                <script>${js}</script>
-            </body>
-            </html>
-        `;
-        
+        const fullContent = `<!DOCTYPE html><html><head><base target="_top"><style>${css}</style></head><body>${html}<script>${js}</script></body></html>`;
         res.set('Content-Type', 'text/html');
         res.send(fullContent);
-    } catch (err) {
-        console.error("Build Error Details:", err.message);
-        res.status(500).send(`Помилка збірки: не знайдено файл`);
-    }
+    } catch (err) { res.status(500).send(`Помилка збірки`); }
 });
 
-/**
- * Маршрут для отримання проєктів (Об'єктів)
- * ПРАВКА: Використовуємо існуючу таблицю 'projects' та фільтр по tenant_id
- */
+// ПРАВИЛЬНИЙ МАРШРУТ ДЛЯ ПРОЕКТІВ
 app.get('/projects', async (req, res) => {
   try {
     const { tenant_id } = req.query;
-
-    let query = supabase
-      .from('projects') 
-      .select('*')
-      .order('created_at', { ascending: false });
-
-    // Фільтруємо за клієнтом, якщо передано ID
+    let query = supabase.from('projects').select('*');
+    
     if (tenant_id) {
       query = query.eq('tenant_id', tenant_id);
     }
-
-    const { data, error } = await query;
-    if (error) throw error;
     
+    const { data, error } = await query.order('created_at', { ascending: false });
+    if (error) throw error;
     res.json(data);
-  } catch (err) { 
-    res.status(500).json({ error: err.message }); 
-  }
+  } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
 const PORT = process.env.PORT || 3000;
