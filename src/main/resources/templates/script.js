@@ -1,21 +1,25 @@
 window.onload = function() {
+  // Отримуємо tenantId з URL (він передається сервером при завантаженні сайдбару)
+  const urlParams = new URLSearchParams(window.location.search);
+  const tenantId = urlParams.get('tid') || "859f518e-49b8-402b-a396-8488e390c500";
+
   google.script.run
     .withSuccessHandler(function(userData) {
       if (!userData) return;
       
-      // 1. Вивід імені та ролі (темно-сірий колір вже в CSS)
+      // 1. Вивід імені та ролі
       document.getElementById('display-user').textContent = userData.name || userData.full_name;
       document.getElementById('display-role').textContent = userData.role;
 
       const role = (userData.role || "").toUpperCase();
       const isAdminOrDispatcher = ['ADMIN', 'DIRECTOR', 'DISPATCHER'].includes(role);
 
-      // 2. Фільтрація Журналу Виробництва (ГОЛОВНИЙ ФІКС БАГА)
+      // 2. Фільтрація Журналу Виробництва
       const adminSection = document.getElementById('admin-sub-production');
       if (isAdminOrDispatcher) {
         if (adminSection) adminSection.style.display = 'block';
       } else {
-        if (adminSection) adminSection.remove(); // Видаляємо фізично для інших ролей
+        if (adminSection) adminSection.remove(); 
       }
 
       // 3. Відображення меню адміністрування та оплати
@@ -30,7 +34,7 @@ window.onload = function() {
         }
       }
     })
-    .getUserData();
+    .getUserData(tenantId); // Передаємо tenantId для ідентифікації
 };
 
 function toggleAcc(el, submenuId) {
@@ -43,10 +47,14 @@ function toggleAcc(el, submenuId) {
 }
 
 function handleSubClick(el, id) {
+  const urlParams = new URLSearchParams(window.location.search);
+  const tenantId = urlParams.get('tid') || "859f518e-49b8-402b-a396-8488e390c500";
+  
   document.querySelectorAll('.sub-link').forEach(link => link.classList.remove('active', 'status-loading'));
   el.classList.add('active');
   const container = document.getElementById('content-container');
 
+  // ЛОГІКА ОНОВЛЕННЯ ЖУРНАЛУ (Через універсальний перемикач)
   if (id === 'refresh-journal') {
     el.classList.add('status-loading');
     container.innerHTML = `<div class="info-status-block"><div class="spinner"></div><span>Оновлення журналу...</span></div>`;
@@ -57,9 +65,15 @@ function handleSubClick(el, id) {
         const now = new Date();
         const timeStr = now.toLocaleTimeString('uk-UA', { hour: '2-digit', minute: '2-digit' });
         const dateStr = now.toLocaleDateString('uk-UA');
-        container.innerHTML = `<div class="info-status-block">Журнал оновлено в ${timeStr}, ${dateStr}</div>`;
+        
+        // Виводимо реальну відповідь з бібліотеки (res)
+        container.innerHTML = `<div class="info-status-block">${res} о ${timeStr}, ${dateStr}</div>`;
       })
-      .refreshProductionJournal();
+      .withFailureHandler(function(err) {
+        el.classList.remove('status-loading');
+        container.innerHTML = `<div class="info-status-block" style="color:#ff4d4d">Помилка: ${err}</div>`;
+      })
+      .generateSheetAction('REFRESH_PROD_LOG', tenantId); // ВИКЛИК УНІВЕРСАЛЬНОЇ ФУНКЦІЇ
   } else {
     container.innerHTML = "Модуль: " + id;
   }
