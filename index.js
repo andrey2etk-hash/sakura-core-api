@@ -8,14 +8,10 @@ app.use(express.json());
 
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
 
-// Мідлвар для перевірки токена (зроблено гнучким для тестів)
 function authenticateToken(req, res, next) {
-  const token = req.headers['authorization'] || req.headers['x-api-key'] || req.query.token;
+  const token = req.headers['authorization'] || req.headers['x-api-key'];
   const expectedToken = process.env.API_KEY;
-  
-  // Якщо токен є в ENV і він збігається — пускаємо. 
-  // Якщо токен не налаштований — пускаємо (для початкового етапу розробки)
-  if (!expectedToken || token === expectedToken) return next();
+  if (token === `Bearer ${expectedToken}` || token === expectedToken) return next();
   return res.status(401).json({ error: 'Unauthorized' });
 }
 
@@ -39,9 +35,10 @@ app.get('/get-user', async (req, res) => {
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-// --- ЗБІРКА ІНТЕРФЕЙСУ ---
+// --- ЗБІРКА ІНТЕРФЕЙСУ ПО МЕТОДИЧЦІ ---
 app.get('/api/interface', (req, res) => {
     const dir = path.join(__dirname, 'src/main/resources/templates');
+    
     try {
         const html = fs.readFileSync(path.join(dir, 'Sidebar.html'), 'utf8');
         const css = fs.readFileSync(path.join(dir, 'style.css'), 'utf8');
@@ -60,26 +57,29 @@ app.get('/api/interface', (req, res) => {
             </body>
             </html>
         `;
+        
         res.set('Content-Type', 'text/html');
         res.send(fullContent);
     } catch (err) {
+        console.error("Build Error Details:", err.message);
         res.status(500).send(`Помилка збірки: не знайдено файл`);
     }
 });
 
 /**
- * ГОЛОВНА ЗМІНА: Маршрут для отримання проєктів (Об'єктів)
+ * Маршрут для отримання проєктів (Об'єктів)
+ * ПРАВКА: Використовуємо існуючу таблицю 'projects' та фільтр по tenant_id
  */
 app.get('/projects', async (req, res) => {
   try {
-    const { tenant_id } = req.query; // Отримуємо ID клієнта з запиту
+    const { tenant_id } = req.query;
 
     let query = supabase
-      .from('objects') // Звертаємося до нашої нової таблиці
+      .from('projects') 
       .select('*')
       .order('created_at', { ascending: false });
 
-    // Якщо передано tenant_id — фільтруємо дані тільки для цього клієнта
+    // Фільтруємо за клієнтом, якщо передано ID
     if (tenant_id) {
       query = query.eq('tenant_id', tenant_id);
     }
