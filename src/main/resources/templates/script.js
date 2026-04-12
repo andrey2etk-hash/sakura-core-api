@@ -34,23 +34,7 @@ function toggleAcc(el, submenuId) {
 }
 
 function handleSubClick(el, id) {
-  document.querySelectorAll('.sub-link').forEach(link => link.classList.remove('active'));
-  el.classList.add('active');
-  
-  if (id === 'refresh-journal') {
-    document.getElementById('content-container').innerHTML = "<i>Оновлення журналу...</i>";
-    google.script.run
-      .withSuccessHandler(function(res) {
-        document.getElementById('content-container').innerText = res;
-      })
-      .refreshProductionJournal();
-  } else {
-    document.getElementById('content-container').innerText = "Активний модуль: " + id;
-  }
-}
-
-function handleSubClick(el, id) {
-  // Скидаємо активність з усіх пунктів
+  // Очищення попередніх станів
   document.querySelectorAll('.sub-link').forEach(link => {
     link.classList.remove('active', 'status-loading');
   });
@@ -59,27 +43,38 @@ function handleSubClick(el, id) {
   const container = document.getElementById('content-container');
 
   if (id === 'refresh-journal') {
-    // 1. Вмикаємо сигнальний стан
+    // 1. Вмикаємо помаранчевий колір
     el.classList.add('status-loading');
-    container.innerHTML = '<div class="info-msg">Журнал виробництва оновлюється...</div>';
+    
+    // 2. Виводимо спінер
+    container.innerHTML = `
+      <div class="info-status-block">
+        <div class="spinner"></div>
+        <span>Журнал виробництва оновлюється...</span>
+      </div>
+    `;
 
-    // 2. Викликаємо Google Script
+    // 3. Запуск процесу в Google Sheets
     google.script.run
       .withSuccessHandler(function(res) {
-        // 3. Повертаємо фіолетовий (прибираємо сигнальний)
         el.classList.remove('status-loading');
         
-        // 4. Фіксуємо час завершення
         const now = new Date();
         const timeStr = now.toLocaleTimeString('uk-UA', { hour: '2-digit', minute: '2-digit' });
         const dateStr = now.toLocaleDateString('uk-UA');
         
-        container.innerHTML = `<div class="info-msg">Журнал виробництва оновлено в ${timeStr}, ${dateStr}</div>`;
+        container.innerHTML = `
+          <div class="info-status-block">
+            <span>Журнал виробництва оновлено в ${timeStr}, ${dateStr}</span>
+          </div>
+        `;
       })
       .withFailureHandler(function(err) {
         el.classList.remove('status-loading');
-        container.innerHTML = '<div style="color:red">Помилка оновлення</div>';
+        container.innerHTML = '<div style="color:var(--danger); font-size:11px;">Помилка оновлення</div>';
       })
-      .refreshProductionJournal(); // Функція в Бібліотеці
+      .refreshProductionJournal();
+  } else {
+    container.innerHTML = "Активний модуль: " + id;
   }
 }
