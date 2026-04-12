@@ -37,11 +37,12 @@ app.get('/get-user', async (req, res) => {
 
 // --- ЗБІРКА ІНТЕРФЕЙСУ ПО МЕТОДИЧЦІ ---
 app.get('/api/interface', (req, res) => {
-    // ВАЖЛИВО: Шлях до папки templates, де лежать ваші 3 файли
+    // Пробуємо знайти папку templates відносно кореня проєкту
     const dir = path.join(__dirname, 'src/main/resources/templates');
     
     try {
-        const html = fs.readFileSync(path.join(dir, 'sidebar.html'), 'utf8');
+        // УВАГА: Sidebar.html з великої літери, як на вашому GitHub!
+        const html = fs.readFileSync(path.join(dir, 'Sidebar.html'), 'utf8');
         const css = fs.readFileSync(path.join(dir, 'style.css'), 'utf8');
         const js = fs.readFileSync(path.join(dir, 'script.js'), 'utf8');
 
@@ -62,8 +63,8 @@ app.get('/api/interface', (req, res) => {
         res.set('Content-Type', 'text/html');
         res.send(fullContent);
     } catch (err) {
-        console.error("Build Error:", err);
-        res.status(500).send("Помилка збірки інтерфейсу: перевірте шляхи до файлів.");
+        console.error("Build Error Details:", err.message);
+        res.status(500).send(`Помилка збірки: не знайдено файл за шляхом ${err.path}`);
     }
 });
 
