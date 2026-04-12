@@ -49,7 +49,7 @@ app.get('/api/interface', (req, res) => {
 app.get('/projects', async (req, res) => {
   try {
     const { tenant_id } = req.query;
-    let query = supabase.from('projects').select('*');
+    let query = supabase.from('projects').select('*').eq('is_archived', false); // ДОДАНО ФІЛЬТР
     
     if (tenant_id) {
       query = query.eq('tenant_id', tenant_id);
