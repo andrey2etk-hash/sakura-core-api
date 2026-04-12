@@ -110,43 +110,56 @@
   <div class="main-content"><div id="content-container">Модуль завантажено.</div></div>
 
   <script>
-    window.onload = function() {
-      google.script.run
-  .withSuccessHandler(function(user) {
-    // Оновлюємо текст у шапці сайдбару
-    document.getElementById('user-name').textContent = user.name;
-    document.getElementById('user-role').textContent = user.role;
-  })
-  .getUserData(); // Ця функція в таблиці-конекторі викличе бібліотеку
-        
+  window.onload = function() {
+    // 1. Отримуємо дані користувача через проксі-функцію
+    google.script.run
+      .withSuccessHandler(function(userData) {
+        if (!userData) return;
+
+        // 2. Оновлюємо текст (використовуємо правильні ID з вашої розмітки)
+        document.getElementById('display-user').textContent = userData.name;
+        document.getElementById('display-role').textContent = userData.role;
+
+        // 3. Логіка для адмінів та оплати
         const bosses = ['ADMIN', 'DIRECTOR', 'DISPATCHER'];
-        if (bosses.includes(userData.role.toUpperCase())) {
+        const userRole = (userData.role || "").toUpperCase();
+
+        if (bosses.includes(userRole)) {
           const payRow = document.getElementById('pay-row');
           const paySpan = document.getElementById('display-pay');
           
-          payRow.style.display = 'flex';
-          paySpan.innerText = userData.daysLeftStr; // Використовуємо повну строку з сервера
+          if (payRow && paySpan) {
+            payRow.style.display = 'flex';
+            paySpan.innerText = userData.daysLeftStr || "20 днів";
+            if (userData.isCritical) paySpan.classList.add('pay-critical');
+          }
           
-          if (userData.isCritical) paySpan.classList.add('pay-critical');
-          
-          document.getElementById('acc-admin').style.display = 'block';
+          const adminMenu = document.getElementById('acc-admin');
+          if (adminMenu) adminMenu.style.display = 'block';
         }
-      }).getUserData();
-    };
+      })
+      .getUserData(); // Один чіткий виклик
+  };
 
-    function toggleAcc(el, submenuId) {
-      const submenu = document.getElementById(submenuId);
-      const wasOpen = submenu.classList.contains('open');
-      document.querySelectorAll('.submenu').forEach(s => s.classList.remove('open'));
-      document.querySelectorAll('.acc-item').forEach(i => i.classList.remove('active'));
-      if (!wasOpen) { submenu.classList.add('open'); el.classList.add('active'); }
+  function toggleAcc(el, submenuId) {
+    const submenu = document.getElementById(submenuId);
+    if (!submenu) return;
+    const wasOpen = submenu.classList.contains('open');
+    
+    document.querySelectorAll('.submenu').forEach(s => s.classList.remove('open'));
+    document.querySelectorAll('.acc-item').forEach(i => i.classList.remove('active'));
+    
+    if (!wasOpen) { 
+      submenu.classList.add('open'); 
+      el.classList.add('active'); 
     }
+  }
 
-    function handleSubClick(el, id) {
-      document.querySelectorAll('.sub-link').forEach(link => link.classList.remove('active'));
-      el.classList.add('active');
-      document.getElementById('content-container').innerText = "Активний модуль: " + id;
-    }
-  </script>
+  function handleSubClick(el, id) {
+    document.querySelectorAll('.sub-link').forEach(link => link.classList.remove('active'));
+    el.classList.add('active');
+    document.getElementById('content-container').innerText = "Активний модуль: " + id;
+  }
+</script>
 </body>
 </html>
