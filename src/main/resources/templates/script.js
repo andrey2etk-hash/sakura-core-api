@@ -48,3 +48,38 @@ function handleSubClick(el, id) {
     document.getElementById('content-container').innerText = "Активний модуль: " + id;
   }
 }
+
+function handleSubClick(el, id) {
+  // Скидаємо активність з усіх пунктів
+  document.querySelectorAll('.sub-link').forEach(link => {
+    link.classList.remove('active', 'status-loading');
+  });
+  
+  el.classList.add('active');
+  const container = document.getElementById('content-container');
+
+  if (id === 'refresh-journal') {
+    // 1. Вмикаємо сигнальний стан
+    el.classList.add('status-loading');
+    container.innerHTML = '<div class="info-msg">Журнал виробництва оновлюється...</div>';
+
+    // 2. Викликаємо Google Script
+    google.script.run
+      .withSuccessHandler(function(res) {
+        // 3. Повертаємо фіолетовий (прибираємо сигнальний)
+        el.classList.remove('status-loading');
+        
+        // 4. Фіксуємо час завершення
+        const now = new Date();
+        const timeStr = now.toLocaleTimeString('uk-UA', { hour: '2-digit', minute: '2-digit' });
+        const dateStr = now.toLocaleDateString('uk-UA');
+        
+        container.innerHTML = `<div class="info-msg">Журнал виробництва оновлено в ${timeStr}, ${dateStr}</div>`;
+      })
+      .withFailureHandler(function(err) {
+        el.classList.remove('status-loading');
+        container.innerHTML = '<div style="color:red">Помилка оновлення</div>';
+      })
+      .refreshProductionJournal(); // Функція в Бібліотеці
+  }
+}
