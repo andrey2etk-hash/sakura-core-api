@@ -38,7 +38,6 @@
     .user-line b { color: var(--sakura); text-transform: uppercase; font-size: 9px; min-width: 85px; }
     .user-line span { color: var(--text-dark); font-weight: 600; }
 
-    /* КРИТИЧНИЙ ДЕДЛАЙН */
     #pay-row { display: none; }
     .pay-critical { color: var(--danger) !important; text-decoration: underline; }
 
@@ -49,7 +48,6 @@
       cursor: default;
     }
 
-    /* СКРОЛБАР ЗАВЖДИ ТУТ, ЩОБ НЕ БУЛО ДРИЖАННЯ */
     .menu-scroll-area::-webkit-scrollbar { width: 4px; }
     .menu-scroll-area::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
 
@@ -81,7 +79,7 @@
       </div>
     </div>
     <div class="user-meta-box">
-      <div class="user-line"><b>КОРИСТУВАЧ:</b> <span id="display-user">...</span></div>
+      <div class="user-line"><b>КОРИСТУВАЧ:</b> <span id="display-user">Завантаження...</span></div>
       <div class="user-line"><b>РОЛЬ:</b> <span id="display-role">...</span></div>
       <div class="user-line" id="pay-row"><b>ОПЛАТА ЧЕРЕЗ:</b> <span id="display-pay">...</span></div>
     </div>
@@ -107,20 +105,19 @@
     </div>
   </div>
 
-  <div class="main-content"><div id="content-container">Модуль завантажено.</div></div>
+  <div class="main-content"><div id="content-container">Оберіть дію в меню.</div></div>
 
-  <script>
+<script>
   window.onload = function() {
-    // 1. Отримуємо дані користувача через проксі-функцію
     google.script.run
       .withSuccessHandler(function(userData) {
         if (!userData) return;
 
-        // 2. Оновлюємо текст (використовуємо правильні ID з вашої розмітки)
+        // Виводимо ім'я та роль
         document.getElementById('display-user').textContent = userData.name;
         document.getElementById('display-role').textContent = userData.role;
 
-        // 3. Логіка для адмінів та оплати
+        // Логіка для адмінів та відображення оплати
         const bosses = ['ADMIN', 'DIRECTOR', 'DISPATCHER'];
         const userRole = (userData.role || "").toUpperCase();
 
@@ -138,7 +135,7 @@
           if (adminMenu) adminMenu.style.display = 'block';
         }
       })
-      .getUserData(); // Один чіткий виклик
+      .getUserData();
   };
 
   function toggleAcc(el, submenuId) {
