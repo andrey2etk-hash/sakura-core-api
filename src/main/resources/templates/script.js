@@ -88,3 +88,23 @@ function runTestPing() {
     })
     .testSystemPing();
 }
+
+/**
+ * Оновлення статусу зв'язку (v1.70)
+ * Використовує глобальний об'єкт i18n
+ */
+function updateUIStatus(isOnline) {
+  const statusText = document.getElementById('status-text');
+  const statusBar = document.getElementById('connection-status');
+  
+  // Беремо текст із нашого "моста"
+  statusText.innerText = isOnline ? i18n.status_online : i18n.status_offline;
+  
+  if (isOnline) {
+    statusBar.classList.remove('status-offline');
+    statusBar.classList.add('status-online');
+  } else {
+    statusBar.classList.remove('status-online');
+    statusBar.classList.add('status-offline');
+  }
+}
