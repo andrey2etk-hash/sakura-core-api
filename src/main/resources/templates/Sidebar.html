@@ -1,3 +1,12 @@
+<script>
+  // Передаємо переклади з сервера в браузер один раз при завантаженні
+  const i18n = {
+    status_online: "<?= t('status_online') ?>",
+    status_offline: "<?= t('status_offline') ?>"
+  };
+</script>
+
+<?!= HtmlService.createHtmlOutputFromFile('script.js').getContent(); ?>
 <div class="static-top">
   <div class="header">
     <img src="https://drive.google.com/thumbnail?id=1QIp2_KURP7v3i4o6-eda3A-mAJh22CTi&sz=w400" class="logo-img">
