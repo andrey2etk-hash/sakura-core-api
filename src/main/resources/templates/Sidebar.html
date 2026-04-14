@@ -32,12 +32,12 @@
       <?= t('menu_journal') ?>
     </div>
     <div id="sub-journal" class="submenu">
-      <div class="sub-link" onclick="handleSubClick(this, 'refresh-journal')"><?= t('link_refresh') ?></div>
+      <div class="sub-link" data-action="refresh-journal" onclick="handleSubClick(this, 'refresh-journal')"><?= t('link_refresh') ?></div>
       <div id="admin-sub-production">
-        <div class="sub-link" onclick="handleSubClick(this, 'add-obj')"><?= t('link_add_obj') ?></div>
-        <div class="sub-link" onclick="handleSubClick(this, 'edit-obj')"><?= t('link_edit_obj') ?></div>
-        <div class="sub-link" onclick="handleSubClick(this, 'delete-obj')"><?= t('link_delete_obj') ?></div>
-        <div class="sub-link" onclick="handleSubClick(this, 'config-journal')">⚙️ <?= t('link_config') ?></div>
+        <div class="sub-link" data-action="add-obj" data-modal="1" onclick="handleSubClick(this, 'add-obj')"><?= t('link_add_obj') ?></div>
+        <div class="sub-link" data-action="edit-obj" data-modal="1" onclick="handleSubClick(this, 'edit-obj')"><?= t('link_edit_obj') ?></div>
+        <div class="sub-link" data-action="delete-obj" data-modal="1" onclick="handleSubClick(this, 'delete-obj')"><?= t('link_delete_obj') ?></div>
+        <div class="sub-link" data-action="config-journal" onclick="handleSubClick(this, 'config-journal')">⚙️ <?= t('link_config') ?></div>
       </div>
     </div>
   
@@ -45,16 +45,16 @@
       <?= t('menu_warehouse') ?>
     </div>
     <div id="sub-warehouse" class="submenu">
-      <div class="sub-link" onclick="handleSubClick(this, 'view-stock')"><?= t('link_stock_list') ?></div>
-      <div class="sub-link" onclick="handleSubClick(this, 'set-status')"><?= t('link_update_status') ?></div>
+      <div class="sub-link" data-action="view-stock" onclick="handleSubClick(this, 'view-stock')"><?= t('link_stock_list') ?></div>
+      <div class="sub-link" data-action="set-status" onclick="handleSubClick(this, 'set-status')"><?= t('link_update_status') ?></div>
     </div>
   
     <div id="acc-admin-main" class="acc-item" style="display:none;" onclick="toggleAcc(this, 'sub-admin')">
       <?= t('menu_admin') ?>
     </div>
     <div id="sub-admin" class="submenu">
-      <div class="sub-link" onclick="handleSubClick(this, 'adm-users')"><?= t('link_users') ?></div>
-      <div class="sub-link" onclick="handleSubClick(this, 'adm-logs')"><?= t('link_logs') ?></div>
+      <div class="sub-link" data-action="adm-users" onclick="handleSubClick(this, 'adm-users')"><?= t('link_users') ?></div>
+      <div class="sub-link" data-action="adm-logs" onclick="handleSubClick(this, 'adm-logs')"><?= t('link_logs') ?></div>
       <div class="sub-link" onclick="runTestPing()"><?= t('link_ping_test') ?></div>
     </div>
   </div>
