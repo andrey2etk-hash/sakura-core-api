@@ -1,80 +1,80 @@
 :root {
-  --sakura: #6A30A8; 
-  --border: #e1d9f1;
-  --text-dark: #3c4043;
-  --gray-light: #9aa0a6;
-  --system-bg: #f0f4fa;
-  --danger: #d93025; 
-  --signal: #D84315; 
-}
-
-body { 
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  margin: 0; padding: 0; background: transparent; overflow: hidden;
-  user-select: none; 
-  -webkit-user-select: none;
-}
-
-.static-top {
-  position: absolute; top: 0; left: 0; right: 0;
-  height: 140px; background: var(--system-bg); z-index: 100;
-  border-bottom: 1px solid #d0d7de;
-}
-
-.header {
-  display: flex; justify-content: space-between; align-items: center;
-  height: 75px; padding: 0 15px; border-bottom: 1px solid #d0d7de;
-}
-.logo-img { height: 50px; width: auto; }
-.header-info { display: flex; flex-direction: column; align-items: flex-end; margin-top: 25px; }
-.version-tag { font-size: 9px; color: var(--gray-light); font-weight: bold; }
-.copyright-tag { font-size: 11px; color: var(--gray-light); }
-
-/* ПРАВКА ШРИФТІВ У ШАПЦІ */
-.user-meta-box { padding: 6px 15px; background: var(--system-bg); }
-.user-line { font-size: 10px; line-height: 1.3; display: flex; gap: 5px; color: var(--text-dark); }
-
-/* Повертаємо фіолетовий колір та жирність для міток (labels) */
-.user-line b { 
-  text-transform: uppercase; 
-  font-size: 9px; 
-  min-width: 80px; 
-  color: var(--sakura); /* ФІОЛЕТОВИЙ ПІДПИС */
-  font-weight: 800;      /* ЖИРНИЙ */
-}
-
-/* Значення (values) залишаємо темними, але робимо чіткими */
-.user-line span { 
-  font-weight: 600; 
-  color: var(--text-dark); 
-}
-
-#pay-row { display: none; }
-
-.menu-scroll-area { 
-  position: absolute; top: 140px; left: 0; right: 0;
-  height: 240px; overflow-y: auto; overflow-x: hidden;
-  background: transparent; border-bottom: 2px solid var(--sakura);
-}
-
-.acc-item {
-  cursor: pointer; padding: 6px 15px; font-size: 13px; font-weight: 400; 
-  color: var(--text-dark); transition: 0.15s; outline: none;
-}
-.acc-item:hover { color: var(--sakura); padding-left: 20px; }
-.acc-item.active { color: var(--sakura); font-weight: 700; padding-left: 25px; }
-
-.submenu { max-height: 0; overflow: hidden; transition: 0.3s; padding-left: 25px; }
-.submenu.open { max-height: 200px; margin-bottom: 5px; }
-
-.sub-link { padding: 3px 0; font-size: 12px; display: block; color: var(--gray-light); cursor: pointer; }
-.sub-link:hover { color: var(--sakura); }
-.sub-link.active { color: var(--sakura); font-weight: 700; }
-
-.status-loading { color: var(--signal) !important; font-weight: bold; }
-
-.info-status-block { display: flex; align-items: center; gap: 10px; font-size: 11px; color: var(--gray-light); margin-top: 10px; }
-.spinner { width: 14px; height: 14px; border: 2px solid #ddd; border-top: 2px solid var(--sakura); border-radius: 50%; animation: spin 1s linear infinite; }
-@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-
-.main-content { position: absolute; top: 382px; left: 0; right: 0; bottom: 0; overflow-y: auto; padding: 12px; }
+    --sakura: #6A30A8; 
+    --border: #e1d9f1;
+    --text-dark: #3c4043;
+    --gray-light: #9aa0a6;
+    --system-bg: #f0f4fa;
+    --danger: #d93025; 
+    --signal: #D84315; 
+  }
+  
+  body { 
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    margin: 0; padding: 0; background: transparent; overflow: hidden;
+    user-select: none; 
+    -webkit-user-select: none;
+  }
+  
+  .static-top {
+    position: absolute; top: 0; left: 0; right: 0;
+    height: 140px; background: var(--system-bg); z-index: 100;
+    border-bottom: 1px solid #d0d7de;
+  }
+  
+  .header {
+    display: flex; justify-content: space-between; align-items: center;
+    height: 75px; padding: 0 15px; border-bottom: 1px solid #d0d7de;
+  }
+  .logo-img { height: 50px; width: auto; }
+  .header-info { display: flex; flex-direction: column; align-items: flex-end; margin-top: 25px; }
+  .version-tag { font-size: 9px; color: var(--gray-light); font-weight: bold; }
+  .copyright-tag { font-size: 11px; color: var(--gray-light); }
+  
+  /* ПРАВКА ШРИФТІВ У ШАПЦІ */
+  .user-meta-box { padding: 6px 15px; background: var(--system-bg); }
+  .user-line { font-size: 10px; line-height: 1.3; display: flex; gap: 5px; color: var(--text-dark); }
+  
+  /* Повертаємо фіолетовий колір та жирність для міток (labels) */
+  .user-line b { 
+    text-transform: uppercase; 
+    font-size: 9px; 
+    min-width: 80px; 
+    color: var(--sakura); /* ФІОЛЕТОВИЙ ПІДПИС */
+    font-weight: 800;      /* ЖИРНИЙ */
+  }
+  
+  /* Значення (values) залишаємо темними, але робимо чіткими */
+  .user-line span { 
+    font-weight: 600; 
+    color: var(--text-dark); 
+  }
+  
+  #pay-row { display: none; }
+  
+  .menu-scroll-area { 
+    position: absolute; top: 140px; left: 0; right: 0;
+    height: 240px; overflow-y: auto; overflow-x: hidden;
+    background: transparent; border-bottom: 2px solid var(--sakura);
+  }
+  
+  .acc-item {
+    cursor: pointer; padding: 6px 15px; font-size: 13px; font-weight: 400; 
+    color: var(--text-dark); transition: 0.15s; outline: none;
+  }
+  .acc-item:hover { color: var(--sakura); padding-left: 20px; }
+  .acc-item.active { color: var(--sakura); font-weight: 700; padding-left: 25px; }
+  
+  .submenu { max-height: 0; overflow: hidden; transition: 0.3s; padding-left: 25px; }
+  .submenu.open { max-height: 200px; margin-bottom: 5px; }
+  
+  .sub-link { padding: 3px 0; font-size: 12px; display: block; color: var(--gray-light); cursor: pointer; }
+  .sub-link:hover { color: var(--sakura); }
+  .sub-link.active { color: var(--sakura); font-weight: 700; }
+  
+  .status-loading { color: var(--signal) !important; font-weight: bold; }
+  
+  .info-status-block { display: flex; align-items: center; gap: 10px; font-size: 11px; color: var(--gray-light); margin-top: 10px; }
+  .spinner { width: 14px; height: 14px; border: 2px solid #ddd; border-top: 2px solid var(--sakura); border-radius: 50%; animation: spin 1s linear infinite; }
+  @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+  
+  .main-content { position: absolute; top: 382px; left: 0; right: 0; bottom: 0; overflow-y: auto; padding: 12px; }
