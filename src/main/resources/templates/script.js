@@ -65,15 +65,25 @@ window.onload = function() {
           const now = new Date();
           const timeStr = now.toLocaleTimeString('uk-UA', { hour: '2-digit', minute: '2-digit' });
           const dateStr = now.toLocaleDateString('uk-UA');
-          
-          // Виводимо реальну відповідь з бібліотеки (res)
-          container.innerHTML = `<div class="info-status-block">${res} о ${timeStr}, ${dateStr}</div>`;
+
+          const message = res && res.ok ? res.data : (res && res.error ? res.error : "Невідома помилка");
+          container.innerHTML = `<div class="info-status-block">${message} о ${timeStr}, ${dateStr}</div>`;
         })
         .withFailureHandler(function(err) {
           el.classList.remove('status-loading');
           container.innerHTML = `<div class="info-status-block" style="color:#ff4d4d">Помилка: ${err}</div>`;
         })
-        .generateSheetAction('REFRESH_PROD_LOG', tenantId); // ВИКЛИК УНІВЕРСАЛЬНОЇ ФУНКЦІЇ
+        .dispatchAction('REFRESH_PROD_LOG', {}, tenantId);
+    } else if (id === 'add-obj') {
+      container.innerHTML = `<div class="info-status-block">Відкриваю форму створення об'єкта...</div>`;
+      google.script.run
+        .withSuccessHandler(function() {
+          container.innerHTML = `<div class="info-status-block">Форма відкрита. Після збереження натисни "Оновити журнал".</div>`;
+        })
+        .withFailureHandler(function(err) {
+          container.innerHTML = `<div class="info-status-block" style="color:#ff4d4d">Не вдалося відкрити форму: ${escapeHtml(err && err.message ? err.message : String(err))}</div>`;
+        })
+        .openCreateProjectModal(tenantId);
     } else if (id === 'config-journal') {
       el.classList.add('status-loading');
       container.innerHTML = `<div class="info-status-block"><div class="spinner"></div><span>Завантаження конфігурації полів...</span></div>`;
