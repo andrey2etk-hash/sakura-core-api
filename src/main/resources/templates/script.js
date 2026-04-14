@@ -233,4 +233,24 @@ window.onload = function() {
         })
         .getSidebarNotice();
     }, 2500);
+
+    setInterval(function() {
+      google.script.run
+        .withSuccessHandler(function(activeMenuId) {
+          syncModalMenuState(activeMenuId || "");
+        })
+        .getActiveModalMenu();
+    }, 1200);
+  }
+
+  function syncModalMenuState(activeMenuId) {
+    const modalLinks = document.querySelectorAll('.sub-link[data-modal="1"]');
+    modalLinks.forEach(function(link) {
+      link.classList.remove('status-loading');
+      if (link.getAttribute('data-action') === activeMenuId) {
+        link.classList.add('active', 'status-loading');
+      } else {
+        link.classList.remove('active');
+      }
+    });
   }
