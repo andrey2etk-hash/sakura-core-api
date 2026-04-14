@@ -71,6 +71,37 @@ app.get('/projects', async (req, res) => {
   }
 });
 
+app.post('/projects', async (req, res) => {
+  try {
+    const { tenant_id, name, customer, deadline, manager_name, object_number, status } = req.body || {};
+    if (!tenant_id || !name) {
+      return res.status(400).json({ error: 'tenant_id and name are required' });
+    }
+
+    const payload = {
+      tenant_id,
+      name,
+      customer: customer || null,
+      deadline: deadline || null,
+      manager_name: manager_name || null,
+      object_number: object_number || null,
+      status: status || 'planned',
+      is_archived: false
+    };
+
+    const { data, error } = await supabase
+      .from('projects')
+      .insert([payload])
+      .select('*')
+      .single();
+
+    if (error) throw error;
+    res.status(201).json(data);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // 4. НАЛАШТУВАННЯ ПОЛІВ ЖУРНАЛУ
 app.get('/field-definitions', async (req, res) => {
   try {
