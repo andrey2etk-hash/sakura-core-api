@@ -35,6 +35,8 @@ window.onload = function() {
         }
       })
       .getUserData(tenantId); // Передаємо tenantId для ідентифікації
+
+    startSidebarNoticePolling();
   };
   
   function toggleAcc(el, submenuId) {
@@ -216,4 +218,19 @@ window.onload = function() {
       .replace(/>/g, '&gt;')
       .replace(/"/g, '&quot;')
       .replace(/'/g, '&#39;');
+  }
+
+  let lastNoticeTs = "";
+  function startSidebarNoticePolling() {
+    setInterval(function() {
+      google.script.run
+        .withSuccessHandler(function(notice) {
+          if (!notice || !notice.ts || notice.ts === lastNoticeTs) return;
+          lastNoticeTs = notice.ts;
+          const node = document.getElementById('global-notice');
+          if (!node) return;
+          node.innerHTML = `Оновлення: ${escapeHtml(notice.message)} • ${new Date(notice.ts).toLocaleTimeString('uk-UA', { hour: '2-digit', minute: '2-digit' })}`;
+        })
+        .getSidebarNotice();
+    }, 2500);
   }
