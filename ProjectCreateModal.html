@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top">
+    <style>
+      body { font-family: Arial, sans-serif; margin: 16px; color: #222; }
+      h3 { margin: 0 0 12px 0; color: #6A30A8; }
+      .row { margin-bottom: 10px; }
+      label { display: block; margin-bottom: 4px; font-size: 12px; font-weight: 700; }
+      input, select {
+        width: 100%;
+        box-sizing: border-box;
+        padding: 8px;
+        border: 1px solid #d7d7d7;
+        border-radius: 6px;
+      }
+      .actions { display: flex; gap: 8px; margin-top: 12px; }
+      button {
+        border: none;
+        border-radius: 6px;
+        padding: 8px 12px;
+        cursor: pointer;
+        font-weight: 700;
+      }
+      .primary { background: #6A30A8; color: #fff; }
+      .ghost { background: #eee; color: #333; }
+      .status { margin-top: 12px; font-size: 12px; }
+      .err { color: #ba1a1a; }
+      .ok { color: #1f7a1f; }
+    </style>
+  </head>
+  <body>
+    <h3>Новий об'єкт</h3>
+
+    <div class="row">
+      <label for="name">Назва проєкту *</label>
+      <input id="name" type="text" placeholder="Напр. Реконструкція цеху">
+    </div>
+    <div class="row">
+      <label for="object_number">№ об'єкта</label>
+      <input id="object_number" type="text" placeholder="Напр. 5547-B">
+    </div>
+    <div class="row">
+      <label for="customer">Замовник</label>
+      <input id="customer" type="text" placeholder="Назва замовника">
+    </div>
+    <div class="row">
+      <label for="manager_name">Менеджер</label>
+      <input id="manager_name" type="text" placeholder="Ім'я менеджера">
+    </div>
+    <div class="row">
+      <label for="deadline">Дедлайн</label>
+      <input id="deadline" type="date">
+    </div>
+    <div class="row">
+      <label for="project_status">Статус</label>
+      <select id="project_status">
+        <option value="planned">planned</option>
+        <option value="in_progress">in_progress</option>
+        <option value="paused">paused</option>
+        <option value="done">done</option>
+      </select>
+    </div>
+
+    <div class="actions">
+      <button class="primary" onclick="submitProject()">Зберегти</button>
+      <button class="ghost" onclick="closeModalSafe()">Скасувати</button>
+    </div>
+    <div id="status_msg" class="status"></div>
+
+    <script>
+      const tenantId = "<?= tenantId ?>";
+      const sourceMenuId = "<?= sourceMenuId ?>";
+
+      window.addEventListener('beforeunload', function() {
+        google.script.run.clearActiveModalMenu(sourceMenuId);
+      });
+
+      function submitProject() {
+        const statusEl = document.getElementById('status_msg');
+        const payload = {
+          name: document.getElementById('name').value.trim(),
+          object_number: document.getElementById('object_number').value.trim(),
+          customer: document.getElementById('customer').value.trim(),
+          manager_name: document.getElementById('manager_name').value.trim(),
+          deadline: document.getElementById('deadline').value || null,
+          status: document.getElementById('project_status').value
+        };
+
+        if (!payload.name) {
+          statusEl.className = 'status err';
+          statusEl.textContent = "Поле 'Назва проєкту' обов'язкове.";
+          return;
+        }
+
+        statusEl.className = 'status';
+        statusEl.textContent = 'Збереження...';
+
+        google.script.run
+          .withSuccessHandler(function(result) {
+            if (!result || !result.ok) {
+              statusEl.className = 'status err';
+              statusEl.textContent = 'Помилка: ' + (result && result.error ? result.error : 'невідома');
+              return;
+            }
+
+            statusEl.className = 'status';
+            statusEl.textContent = "Об'єкт створено. Оновлюю журнал...";
+
+            google.script.run
+              .withSuccessHandler(function(refreshResult) {
+                const ok = refreshResult && refreshResult.ok;
+                statusEl.className = ok ? 'status ok' : 'status err';
+                statusEl.textContent = ok
+                  ? "Готово! Об'єкт створено, журнал оновлено."
+                  : ("Об'єкт створено, але журнал не оновився: " + (refreshResult && refreshResult.error ? refreshResult.error : 'невідома помилка'));
+                google.script.run.setSidebarNotice(statusEl.textContent);
+                setTimeout(closeModalSafe, 900);
+              })
+              .withFailureHandler(function(err) {
+                statusEl.className = 'status err';
+                statusEl.textContent = "Об'єкт створено, але помилка оновлення журналу: " + (err && err.message ? err.message : String(err));
+                google.script.run.setSidebarNotice(statusEl.textContent);
+                setTimeout(closeModalSafe, 1200);
+              })
+              .dispatchAction('REFRESH_PROD_LOG', {}, tenantId);
+          })
+          .withFailureHandler(function(err) {
+            statusEl.className = 'status err';
+            statusEl.textContent = 'Помилка запиту: ' + (err && err.message ? err.message : String(err));
+          })
+          .dispatchAction('CREATE_PROJECT', payload, tenantId);
+      }
+
+      function closeModalSafe() {
+        google.script.run
+          .withSuccessHandler(function() {
+            google.script.host.close();
+          })
+          .withFailureHandler(function() {
+            // Навіть якщо очищення не вдалося, все одно не блокуємо закриття.
+            google.script.host.close();
+          })
+          .clearActiveModalMenu(sourceMenuId);
+      }
+    </script>
+  </body>
+</html>

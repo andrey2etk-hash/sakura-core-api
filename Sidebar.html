@@ -1,0 +1,65 @@
+<script>
+    // Цей міст тепер працюватиме, бо ми змусимо Google обробити цей текст
+    const i18n = {
+      status_online: "<?= t('status_online') ?>",
+      status_offline: "<?= t('status_offline') ?>"
+    };
+  </script>
+  
+  <div class="static-top">
+    <div class="header">
+      <img src="https://drive.google.com/thumbnail?id=1QIp2_KURP7v3i4o6-eda3A-mAJh22CTi&sz=w400" class="logo-img">
+      <div class="header-info">
+        <div class="version-tag">v1.70</div>
+        <div class="copyright-tag">© Sakura Core 2026</div>
+      </div>
+    </div>
+  
+    <div id="connection-status" class="status-bar status-offline">
+      <span class="status-dot"></span>
+      <span id="status-text"><?= t('status_checking') ?></span>
+    </div>
+  
+    <div class="user-meta-box">
+      <div class="user-line"><b><?= t('label_user') ?>:</b> <span id="display-user"><?= t('loading') ?></span></div>
+      <div class="user-line"><b><?= t('label_role') ?>:</b> <span id="display-role">...</span></div>
+      <div class="user-line" id="pay-row"><b><?= t('label_pay_via') ?>:</b> <span id="display-pay">...</span></div>
+    </div>
+  </div>
+  
+  <div class="menu-scroll-area">
+    <div class="acc-item" data-module="core" onclick="toggleAcc(this, 'sub-journal')">
+      <?= t('menu_journal') ?>
+    </div>
+    <div id="sub-journal" class="submenu" data-module="core">
+      <div class="sub-link" data-action="refresh-journal" onclick="handleSubClick(this, 'refresh-journal')"><?= t('link_refresh') ?></div>
+      <div id="admin-sub-production" data-roles="ADMIN,DIRECTOR,DISPATCHER">
+        <div class="sub-link" data-action="add-obj" data-modal="1" onclick="handleSubClick(this, 'add-obj')"><?= t('link_add_obj') ?></div>
+        <div class="sub-link" data-action="edit-obj" data-modal="1" onclick="handleSubClick(this, 'edit-obj')"><?= t('link_edit_obj') ?></div>
+        <div class="sub-link" data-action="delete-obj" data-modal="1" onclick="handleSubClick(this, 'delete-obj')"><?= t('link_delete_obj') ?></div>
+        <div class="sub-link" data-action="config-journal" onclick="handleSubClick(this, 'config-journal')">⚙️ <?= t('link_config') ?></div>
+      </div>
+    </div>
+  
+    <div class="acc-item" data-module="warehouse" onclick="toggleAcc(this, 'sub-warehouse')">
+      <?= t('menu_warehouse') ?>
+    </div>
+    <div id="sub-warehouse" class="submenu" data-module="warehouse">
+      <div class="sub-link" data-action="view-stock" onclick="handleSubClick(this, 'view-stock')"><?= t('link_stock_list') ?></div>
+      <div class="sub-link" data-action="set-status" onclick="handleSubClick(this, 'set-status')"><?= t('link_update_status') ?></div>
+    </div>
+  
+    <div id="acc-admin-main" class="acc-item" data-module="admin" data-roles="ADMIN,DIRECTOR,DISPATCHER" style="display:none;" onclick="toggleAcc(this, 'sub-admin')">
+      <?= t('menu_admin') ?>
+    </div>
+    <div id="sub-admin" class="submenu" data-module="admin" data-roles="ADMIN,DIRECTOR,DISPATCHER">
+      <div class="sub-link" data-action="adm-users" onclick="handleSubClick(this, 'adm-users')"><?= t('link_users') ?></div>
+      <div class="sub-link" data-action="adm-logs" onclick="handleSubClick(this, 'adm-logs')"><?= t('link_logs') ?></div>
+      <div class="sub-link" onclick="runTestPing()"><?= t('link_ping_test') ?></div>
+    </div>
+  </div>
+  
+  <div class="main-content">
+    <div id="content-container"><?= t('msg_select_action') ?></div>
+    <div id="global-notice" style="margin-top:8px; font-size:11px; color:#7a7a7a;"></div>
+  </div>

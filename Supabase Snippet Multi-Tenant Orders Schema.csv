@@ -1,0 +1,101 @@
+table_name,column_name,data_type,is_nullable,column_default
+locations,id,uuid,NO,gen_random_uuid()
+locations,tenant_id,uuid,NO,null
+locations,name,text,NO,null
+locations,address,text,YES,null
+locations,status,text,YES,'active'::text
+orders,id,uuid,NO,gen_random_uuid()
+orders,tenant_id,uuid,YES,null
+orders,name,text,NO,null
+orders,status,text,YES,'planned'::text
+orders,deadline,date,YES,null
+orders,created_at,timestamp with time zone,YES,now()
+product_registry,id,integer,NO,nextval('product_registry_id_seq'::regclass)
+product_registry,project_prefix,text,NO,null
+product_registry,type_code,text,NO,null
+product_registry,item_number,integer,NO,null
+product_registry,full_job_number,text,YES,null
+product_registry,display_name,text,YES,null
+product_registry,dimensions,text,YES,null
+product_registry,created_at,timestamp without time zone,YES,CURRENT_TIMESTAMP
+product_types,id,uuid,NO,uuid_generate_v4()
+product_types,tenant_id,uuid,NO,null
+product_types,name,text,NO,null
+product_types,code,text,NO,null
+product_types,created_at,timestamp with time zone,YES,now()
+production_areas,id,uuid,NO,gen_random_uuid()
+production_areas,tenant_id,uuid,NO,null
+production_areas,name,text,NO,null
+production_areas,location_id,uuid,YES,null
+project_items,id,uuid,NO,gen_random_uuid()
+project_items,project_id,uuid,YES,null
+project_items,display_name,text,NO,null
+project_items,quantity,integer,YES,1
+project_items,mass_kg,integer,YES,null
+project_items,ip_rating,text,YES,'IP00'::text
+project_items,depth,integer,YES,null
+project_items,height,integer,YES,null
+project_items,width,integer,YES,null
+project_items,type_code,text,YES,null
+project_items,item_number,integer,YES,null
+project_items,full_job_number,text,YES,null
+project_items,is_archived,boolean,YES,false
+projects,id,uuid,NO,gen_random_uuid()
+projects,tenant_id,uuid,NO,gen_random_uuid()
+projects,name,text,NO,null
+projects,status,text,YES,'planned'::text
+projects,deadline,date,YES,null
+projects,created_at,timestamp with time zone,YES,now()
+projects,customer,text,YES,null
+projects,contract_number,text,YES,null
+projects,start_date,date,YES,null
+projects,manager_name,text,YES,null
+projects,description,text,YES,null
+projects,object_number,text,YES,null
+projects,customer_contact,text,YES,null
+projects,customer_person,text,YES,null
+projects,order_transfer_date,date,YES,null
+projects,is_archived,boolean,YES,false
+sheet_metal_orders,id,integer,NO,nextval('sheet_metal_orders_id_seq'::regclass)
+sheet_metal_orders,item_name,text,NO,null
+sheet_metal_orders,material,text,YES,null
+sheet_metal_orders,thickness_mm,numeric,YES,null
+sheet_metal_orders,quantity,integer,YES,1
+sheet_metal_orders,bends_count,integer,YES,0
+sheet_metal_orders,worker_name,text,YES,null
+sheet_metal_orders,status,text,YES,'В черзі'::text
+sheet_metal_orders,created_at,timestamp without time zone,YES,CURRENT_TIMESTAMP
+tasks,id,uuid,NO,gen_random_uuid()
+tasks,order_id,uuid,YES,null
+tasks,area_id,uuid,YES,null
+tasks,description,text,YES,null
+tasks,is_completed,boolean,YES,false
+tasks,completed_at,timestamp with time zone,YES,null
+tasks,created_at,timestamp with time zone,YES,now()
+tasks,tenant_id,uuid,NO,null
+tenants,id,uuid,NO,gen_random_uuid()
+tenants,company_name,text,NO,null
+tenants,locale,text,NO,'en'::text
+tenants,timezone,text,NO,'UTC'::text
+tenants,api_key,text,NO,null
+tenants,subscription_status,text,NO,'trial'::text
+tenants,trial_ends_at,timestamp with time zone,YES,(now() + '7 days'::interval)
+tenants,created_at,timestamp with time zone,YES,now()
+tenants,tenant_slug,text,YES,null
+user_permissions,id,uuid,NO,gen_random_uuid()
+user_permissions,tenant_id,uuid,NO,gen_random_uuid()
+user_permissions,email,text,NO,null
+user_permissions,role,text,NO,'guest'::text
+user_permissions,options,jsonb,YES,'{}'::jsonb
+user_permissions,created_at,timestamp with time zone,YES,now()
+user_permissions,full_name,text,YES,null
+work_logs,id,integer,NO,nextval('work_logs_id_seq'::regclass)
+work_logs,worker_name,text,NO,null
+work_logs,task_description,text,NO,null
+work_logs,status,text,YES,'Completed'::text
+work_logs,hours_spent,numeric,YES,null
+work_logs,created_at,timestamp without time zone,YES,CURRENT_TIMESTAMP
+workstations,id,uuid,NO,gen_random_uuid()
+workstations,area_id,uuid,YES,null
+workstations,name,text,NO,null
+workstations,status,text,YES,'active'::text
