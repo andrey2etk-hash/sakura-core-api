@@ -71,7 +71,54 @@ app.get('/projects', async (req, res) => {
   }
 });
 
-// 4. ТЕСТОВИЙ ПІНГ (Для перевірки зв'язку)
+// 4. НАЛАШТУВАННЯ ПОЛІВ ЖУРНАЛУ
+app.get('/field-definitions', async (req, res) => {
+  try {
+    const { tenant_id } = req.query;
+    if (!tenant_id) {
+      return res.status(400).json({ error: 'tenant_id is required' });
+    }
+
+    const { data, error } = await supabase
+      .from('field_definitions')
+      .select('id, tenant_id, field_key, field_label, field_type, is_active, created_at')
+      .eq('tenant_id', tenant_id)
+      .order('created_at', { ascending: true });
+
+    if (error) throw error;
+    res.json(data || []);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.patch('/field-definitions/:id/toggle', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { tenant_id, is_active } = req.body;
+
+    if (!tenant_id || typeof is_active !== 'boolean') {
+      return res.status(400).json({ error: 'tenant_id and boolean is_active are required' });
+    }
+
+    const { data, error } = await supabase
+      .from('field_definitions')
+      .update({ is_active })
+      .eq('id', id)
+      .eq('tenant_id', tenant_id)
+      .select('id, tenant_id, field_key, field_label, field_type, is_active, created_at')
+      .single();
+
+    if (error) throw error;
+    if (!data) return res.status(404).json({ error: 'Field definition not found' });
+
+    res.json(data);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// 5. ТЕСТОВИЙ ПІНГ (Для перевірки зв'язку)
 app.get('/test-ping', async (req, res) => {
   try {
     const { data, error } = await supabase
