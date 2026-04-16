@@ -1,65 +1,236 @@
 <script>
-    // Цей міст тепер працюватиме, бо ми змусимо Google обробити цей текст
-    const i18n = {
-      status_online: "<?= t('status_online') ?>",
-      status_offline: "<?= t('status_offline') ?>"
-    };
-  </script>
-  
-  <div class="static-top">
-    <div class="header">
-      <img src="https://drive.google.com/thumbnail?id=1QIp2_KURP7v3i4o6-eda3A-mAJh22CTi&sz=w400" class="logo-img">
-      <div class="header-info">
-        <div class="version-tag">v1.70</div>
-        <div class="copyright-tag">© Sakura Core 2026</div>
+  const i18n = {
+    status_online: "<?= t('status_online') ?>",
+    status_offline: "<?= t('status_offline') ?>"
+  };
+</script>
+
+<aside class="sidebar-shell">
+  <div class="sidebar">
+    <div class="sidebar__glow"></div>
+
+    <header class="sidebar__header">
+      <div class="brand">
+        <div class="brand__icon" aria-hidden="true">
+          <svg viewBox="0 0 32 32" class="brand__svg">
+            <path d="M16 4.5c1.9 0 3.4 3.2 3.4 6.3 0 1-.1 1.8-.4 2.6 1-.7 2.4-1.1 3.8-1.1 3.6 0 6.6 1.9 6.6 4.2 0 1.6-1.4 2.8-3.4 3.5-1.1.4-2.3.6-3.4.7 2.2 1.4 4 3.5 4 5.6 0 2-1.2 3.1-2.9 3.1-2.7 0-5.9-2.2-7.7-4.9-1.8 2.7-5 4.9-7.7 4.9-1.7 0-2.9-1.1-2.9-3.1 0-2.1 1.8-4.2 4-5.6-1.1-.1-2.3-.3-3.4-.7C4.4 19.4 3 18.2 3 16.6c0-2.3 3-4.2 6.6-4.2 1.4 0 2.8.4 3.8 1.1-.3-.8-.4-1.6-.4-2.6 0-3.1 1.5-6.3 3.4-6.3Z"/>
+            <circle cx="16" cy="17" r="3.1"/>
+          </svg>
+        </div>
+        <div class="brand__meta">
+          <div class="brand__title">SAKURA CORE</div>
+          <div class="brand__subtitle">Sakura Core v1.70</div>
+        </div>
+        <div class="brand__chevron" aria-hidden="true">
+          <svg viewBox="0 0 16 16">
+            <path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6"/>
+          </svg>
+        </div>
+      </div>
+
+      <div id="connection-status" class="status-pill status-offline">
+        <span class="status-pill__dot"></span>
+        <span id="status-text"><?= t('status_checking') ?></span>
+      </div>
+    </header>
+
+    <div class="sidebar__meta">
+      <div class="meta-row">
+        <span class="meta-row__label"><?= t('label_user') ?></span>
+        <span id="display-user" class="meta-row__value"><?= t('loading') ?></span>
+      </div>
+      <div class="meta-row">
+        <span class="meta-row__label"><?= t('label_role') ?></span>
+        <span id="display-role" class="meta-row__value">...</span>
+      </div>
+      <div class="meta-row" id="pay-row">
+        <span class="meta-row__label"><?= t('label_pay_via') ?></span>
+        <span id="display-pay" class="meta-row__value">...</span>
       </div>
     </div>
-  
-    <div id="connection-status" class="status-bar status-offline">
-      <span class="status-dot"></span>
-      <span id="status-text"><?= t('status_checking') ?></span>
-    </div>
-  
-    <div class="user-meta-box">
-      <div class="user-line"><b><?= t('label_user') ?>:</b> <span id="display-user"><?= t('loading') ?></span></div>
-      <div class="user-line"><b><?= t('label_role') ?>:</b> <span id="display-role">...</span></div>
-      <div class="user-line" id="pay-row"><b><?= t('label_pay_via') ?>:</b> <span id="display-pay">...</span></div>
-    </div>
-  </div>
-  
-  <div class="menu-scroll-area">
-    <div class="acc-item" onclick="toggleAcc(this, 'sub-journal')">
-      <?= t('menu_journal') ?>
-    </div>
-    <div id="sub-journal" class="submenu">
-      <div class="sub-link" data-action="refresh-journal" onclick="handleSubClick(this, 'refresh-journal')"><?= t('link_refresh') ?></div>
-      <div id="admin-sub-production">
-        <div class="sub-link" data-action="add-obj" data-modal="1" onclick="handleSubClick(this, 'add-obj')"><?= t('link_add_obj') ?></div>
-        <div class="sub-link" data-action="edit-obj" data-modal="1" onclick="handleSubClick(this, 'edit-obj')"><?= t('link_edit_obj') ?></div>
-        <div class="sub-link" data-action="delete-obj" data-modal="1" onclick="handleSubClick(this, 'delete-obj')"><?= t('link_delete_obj') ?></div>
-        <div class="sub-link" data-action="config-journal" onclick="handleSubClick(this, 'config-journal')">⚙️ <?= t('link_config') ?></div>
+
+    <nav class="sidebar__menu" aria-label="Sidebar menu">
+      <div class="menu-group is-open" data-module="core">
+        <button class="menu-item menu-item--active" type="button" data-group-target="sub-journal" onclick="toggleAcc(this, 'sub-journal')">
+          <span class="menu-item__icon" aria-hidden="true">
+            <svg viewBox="0 0 20 20">
+              <path d="M3 4.75A1.75 1.75 0 0 1 4.75 3h10.5A1.75 1.75 0 0 1 17 4.75v10.5A1.75 1.75 0 0 1 15.25 17H4.75A1.75 1.75 0 0 1 3 15.25V4.75Zm2.5.25v3h3V5h-3Zm4.5 0v3h4.5V5H10Zm-4.5 4.5v4.5h3V9.5h-3Zm4.5 0v4.5h4.5V9.5H10Z" fill="currentColor"/>
+            </svg>
+          </span>
+          <span class="menu-item__label"><?= t('menu_journal') ?></span>
+          <span class="menu-item__chevron" aria-hidden="true">
+            <svg viewBox="0 0 16 16">
+              <path d="M6 4l4 4-4 4" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"/>
+            </svg>
+          </span>
+        </button>
+
+        <div id="sub-journal" class="submenu submenu--open" data-module="core">
+          <button class="submenu-item" type="button" data-action="refresh-journal" onclick="handleSubClick(this, 'refresh-journal')">
+            <span class="submenu-item__icon" aria-hidden="true">
+              <svg viewBox="0 0 20 20">
+                <path d="M10 3.25a6.75 6.75 0 1 1-6.2 4.1" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.8"/>
+                <path d="M3.75 3.75v4h4" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"/>
+              </svg>
+            </span>
+            <span class="submenu-item__label"><?= t('link_refresh') ?></span>
+          </button>
+
+          <div id="admin-sub-production" class="submenu-admin">
+            <button class="submenu-item" type="button" data-action="add-obj" data-modal="1" onclick="handleSubClick(this, 'add-obj')">
+              <span class="submenu-item__icon" aria-hidden="true">
+                <svg viewBox="0 0 20 20">
+                  <path d="M3 6.25A1.75 1.75 0 0 1 4.75 4.5h3.1l1.2 1.35h6.2A1.75 1.75 0 0 1 17 7.6v6.65A1.75 1.75 0 0 1 15.25 16H4.75A1.75 1.75 0 0 1 3 14.25v-8Z" fill="currentColor"/>
+                </svg>
+              </span>
+              <span class="submenu-item__label"><?= t('link_add_obj') ?></span>
+              <span class="submenu-item__status">New</span>
+            </button>
+
+            <button class="submenu-item" type="button" data-action="edit-obj" data-modal="1" onclick="handleSubClick(this, 'edit-obj')">
+              <span class="submenu-item__icon" aria-hidden="true">
+                <svg viewBox="0 0 20 20">
+                  <path d="M4 14.25V16h1.75l8.65-8.65-1.75-1.75L4 14.25Zm11.2-7.8 1-1a1.24 1.24 0 0 0 0-1.75l-.9-.9a1.24 1.24 0 0 0-1.75 0l-1 1 2.65 2.65Z" fill="currentColor"/>
+                </svg>
+              </span>
+              <span class="submenu-item__label"><?= t('link_edit_obj') ?></span>
+            </button>
+
+            <button class="submenu-item" type="button" data-action="delete-obj" data-modal="1" onclick="handleSubClick(this, 'delete-obj')">
+              <span class="submenu-item__icon" aria-hidden="true">
+                <svg viewBox="0 0 20 20">
+                  <path d="M6.75 4.5h6.5M8 4.5V3.6c0-.33.27-.6.6-.6h2.8c.33 0 .6.27.6.6v.9m-6 2.1.5 8.2c.04.68.6 1.2 1.28 1.2h3.64c.68 0 1.24-.52 1.28-1.2l.5-8.2" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.7"/>
+                </svg>
+              </span>
+              <span class="submenu-item__label"><?= t('link_delete_obj') ?></span>
+            </button>
+
+            <button class="submenu-item" type="button" data-action="config-journal" onclick="handleSubClick(this, 'config-journal')">
+              <span class="submenu-item__icon" aria-hidden="true">
+                <svg viewBox="0 0 20 20">
+                  <path d="M10 6.4a3.6 3.6 0 1 0 0 7.2 3.6 3.6 0 0 0 0-7.2Zm7 3.6-.93.54a6.97 6.97 0 0 1-.4.97l.3 1.03a.8.8 0 0 1-.2.8l-1 1a.8.8 0 0 1-.8.2l-1.03-.3c-.3.16-.62.3-.95.4L11 17a.8.8 0 0 1-.78.6H9.78A.8.8 0 0 1 9 17l-.24-1.06c-.33-.1-.65-.24-.95-.4l-1.03.3a.8.8 0 0 1-.8-.2l-1-1a.8.8 0 0 1-.2-.8l.3-1.03c-.16-.3-.3-.62-.4-.95L3 10.8a.8.8 0 0 1-.6-.78v-.44A.8.8 0 0 1 3 8.8l1.06-.24c.1-.33.24-.65.4-.95l-.3-1.03a.8.8 0 0 1 .2-.8l1-1a.8.8 0 0 1 .8-.2l1.03.3c.3-.16.62-.3.95-.4L9 3a.8.8 0 0 1 .78-.6h.44A.8.8 0 0 1 11 3l.24 1.06c.33.1.65.24.95.4l1.03-.3a.8.8 0 0 1 .8.2l1 1a.8.8 0 0 1 .2.8l-.3 1.03c.16.3.3.62.4.95L17 8.8a.8.8 0 0 1 .6.78v.44A.8.8 0 0 1 17 10Z" fill="none" stroke="currentColor" stroke-linejoin="round" stroke-width="1.3"/>
+                </svg>
+              </span>
+              <span class="submenu-item__label"><?= t('link_config') ?></span>
+            </button>
+          </div>
+        </div>
       </div>
-    </div>
-  
-    <div class="acc-item" onclick="toggleAcc(this, 'sub-warehouse')">
-      <?= t('menu_warehouse') ?>
-    </div>
-    <div id="sub-warehouse" class="submenu">
-      <div class="sub-link" data-action="view-stock" onclick="handleSubClick(this, 'view-stock')"><?= t('link_stock_list') ?></div>
-      <div class="sub-link" data-action="set-status" onclick="handleSubClick(this, 'set-status')"><?= t('link_update_status') ?></div>
-    </div>
-  
-    <div id="acc-admin-main" class="acc-item" style="display:none;" onclick="toggleAcc(this, 'sub-admin')">
-      <?= t('menu_admin') ?>
-    </div>
-    <div id="sub-admin" class="submenu">
-      <div class="sub-link" data-action="adm-users" onclick="handleSubClick(this, 'adm-users')"><?= t('link_users') ?></div>
-      <div class="sub-link" data-action="adm-logs" onclick="handleSubClick(this, 'adm-logs')"><?= t('link_logs') ?></div>
-      <div class="sub-link" onclick="runTestPing()"><?= t('link_ping_test') ?></div>
-    </div>
+
+      <div class="menu-group" data-module="warehouse">
+        <button class="menu-item" type="button" data-group-target="sub-warehouse" onclick="toggleAcc(this, 'sub-warehouse')">
+          <span class="menu-item__icon" aria-hidden="true">
+            <svg viewBox="0 0 20 20">
+              <path d="M2.75 6.1 10 2.75l7.25 3.35L10 9.45 2.75 6.1Zm0 2.58L9.3 11.7a1.7 1.7 0 0 0 1.4 0l6.55-3.02v5.22L10 17.25l-7.25-3.35V8.68Z" fill="currentColor"/>
+            </svg>
+          </span>
+          <span class="menu-item__label"><?= t('menu_warehouse') ?></span>
+          <span class="menu-item__chevron" aria-hidden="true">
+            <svg viewBox="0 0 16 16">
+              <path d="M6 4l4 4-4 4" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"/>
+            </svg>
+          </span>
+        </button>
+
+        <div id="sub-warehouse" class="submenu" data-module="warehouse">
+          <button class="submenu-item" type="button" data-action="view-stock" onclick="handleSubClick(this, 'view-stock')">
+            <span class="submenu-item__icon" aria-hidden="true">
+              <svg viewBox="0 0 20 20">
+                <path d="M3.5 5.5h13v9h-13zM6 8h3M6 11h6" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6"/>
+              </svg>
+            </span>
+            <span class="submenu-item__label"><?= t('link_stock_list') ?></span>
+          </button>
+
+          <button class="submenu-item" type="button" data-action="set-status" onclick="handleSubClick(this, 'set-status')">
+            <span class="submenu-item__icon" aria-hidden="true">
+              <svg viewBox="0 0 20 20">
+                <path d="M10 3.2 4 6v4.2c0 3.3 2.3 6.4 6 7.6 3.7-1.2 6-4.3 6-7.6V6l-6-2.8Zm-1 9.4-2-2 1.1-1.1L9 10.3l3-3 1.1 1.1-4.1 4.2Z" fill="currentColor"/>
+              </svg>
+            </span>
+            <span class="submenu-item__label"><?= t('link_update_status') ?></span>
+          </button>
+        </div>
+      </div>
+
+      <div id="acc-admin-main" class="menu-group" data-module="admin" data-roles="ADMIN,DIRECTOR,DISPATCHER">
+        <button class="menu-item" type="button" data-group-target="sub-admin" onclick="toggleAcc(this, 'sub-admin')">
+          <span class="menu-item__icon" aria-hidden="true">
+            <svg viewBox="0 0 20 20">
+              <path d="M10 2.75a2.75 2.75 0 1 1 0 5.5 2.75 2.75 0 0 1 0-5.5Zm-5 12.5A4.75 4.75 0 0 1 9.75 10.5h.5A4.75 4.75 0 0 1 15 15.25V17H5v-1.75Zm11-9.75h2v2h-2zm0 4h2v2h-2zm0 4h2v2h-2Z" fill="currentColor"/>
+            </svg>
+          </span>
+          <span class="menu-item__label"><?= t('menu_admin') ?></span>
+          <span class="menu-item__chevron" aria-hidden="true">
+            <svg viewBox="0 0 16 16">
+              <path d="M6 4l4 4-4 4" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"/>
+            </svg>
+          </span>
+        </button>
+
+        <div id="sub-admin" class="submenu" data-module="admin" data-roles="ADMIN,DIRECTOR,DISPATCHER">
+          <button class="submenu-item" type="button" data-action="adm-users" onclick="handleSubClick(this, 'adm-users')">
+            <span class="submenu-item__icon" aria-hidden="true">
+              <svg viewBox="0 0 20 20">
+                <path d="M6.2 8.5a2.2 2.2 0 1 0 0-4.4 2.2 2.2 0 0 0 0 4.4Zm7.6 0a2.2 2.2 0 1 0 0-4.4 2.2 2.2 0 0 0 0 4.4ZM3.8 15.9v-.6A3.3 3.3 0 0 1 7.1 12h1.8a3.3 3.3 0 0 1 3.3 3.3v.6m.7 0v-.6A3.3 3.3 0 0 1 16.2 12H17" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"/>
+              </svg>
+            </span>
+            <span class="submenu-item__label"><?= t('link_users') ?></span>
+          </button>
+
+          <button class="submenu-item" type="button" data-action="adm-logs" onclick="handleSubClick(this, 'adm-logs')">
+            <span class="submenu-item__icon" aria-hidden="true">
+              <svg viewBox="0 0 20 20">
+                <path d="M5 4.5h10v11H5zM7.5 7.5h5M7.5 10.2h5M7.5 12.9h3.4" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6"/>
+              </svg>
+            </span>
+            <span class="submenu-item__label"><?= t('link_logs') ?></span>
+          </button>
+
+          <button class="submenu-item" type="button" onclick="runTestPing()">
+            <span class="submenu-item__icon" aria-hidden="true">
+              <svg viewBox="0 0 20 20">
+                <path d="M10 3.5v3m0 7v3m6.5-6.5h-3m-7 0h-3m10.1-4.6-2.1 2.1m-5 5-2.1 2.1m0-9.2 2.1 2.1m5 5 2.1 2.1" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.6"/>
+              </svg>
+            </span>
+            <span class="submenu-item__label"><?= t('link_ping_test') ?></span>
+          </button>
+        </div>
+      </div>
+    </nav>
+
+    <section class="sidebar__content">
+      <div id="content-container" class="content-card"><?= t('msg_select_action') ?></div>
+      <div id="global-notice" class="global-notice"></div>
+    </section>
+
+    <button class="create-button" type="button" onclick="handleSubClick(document.querySelector('.submenu-item[data-action=&quot;add-obj&quot;]'), 'add-obj')">
+      <span class="create-button__icon" aria-hidden="true">
+        <svg viewBox="0 0 20 20">
+          <path d="M10 4v12M4 10h12" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.8"/>
+        </svg>
+      </span>
+      <span class="create-button__label"><?= t('link_add_obj') ?></span>
+      <span class="create-button__chevron" aria-hidden="true">
+        <svg viewBox="0 0 16 16">
+          <path d="M6 4l4 4-4 4" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"/>
+        </svg>
+      </span>
+    </button>
+
+    <footer class="profile-card">
+      <div class="profile-card__avatar-wrap">
+        <img src="https://i.pravatar.cc/84?img=12" alt="User avatar" class="profile-card__avatar">
+      </div>
+      <div class="profile-card__info">
+        <div id="profile-user" class="profile-card__name"><?= t('loading') ?></div>
+        <div id="profile-role" class="profile-card__role">...</div>
+      </div>
+      <button class="profile-card__action" type="button" aria-label="Connection status">
+        <svg viewBox="0 0 20 20">
+          <path d="M10 3.5v6M6.2 5.3a5.4 5.4 0 1 0 7.6 0" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.8"/>
+        </svg>
+      </button>
+    </footer>
   </div>
-  
-  <div class="main-content">
-    <div id="content-container"><?= t('msg_select_action') ?></div>
-    <div id="global-notice" style="margin-top:8px; font-size:11px; color:#7a7a7a;"></div>
-  </div>
+</aside>
