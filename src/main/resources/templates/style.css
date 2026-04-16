@@ -1,18 +1,19 @@
 :root {
-  --bg-top: #17141f;
-  --bg-bottom: #13111a;
-  --panel-border: rgba(255, 255, 255, 0.08);
-  --panel-border-soft: rgba(255, 255, 255, 0.06);
-  --panel-fill: rgba(255, 255, 255, 0.03);
-  --text-main: #f5f2ff;
-  --text-soft: #d7d2e8;
-  --text-muted: #8f88a8;
-  --text-dim: #7d7495;
-  --accent: #b88cff;
-  --accent-soft: #d7b5ff;
-  --accent-line: rgba(196, 154, 255, 0.18);
-  --accent-bg: rgba(168, 122, 255, 0.14);
-  --danger: #ff7f91;
+  --app-bg: rgb(191, 194, 199);
+  --bg-top: #f6f2ff;
+  --bg-bottom: #e8e1f4;
+  --panel-border: rgba(66, 44, 104, 0.14);
+  --panel-border-soft: rgba(66, 44, 104, 0.1);
+  --panel-fill: rgba(255, 255, 255, 0.42);
+  --text-main: #281f39;
+  --text-soft: #4d4460;
+  --text-muted: #726985;
+  --text-dim: #8b83a0;
+  --accent: #8d5cff;
+  --accent-soft: #9b6cff;
+  --accent-line: rgba(141, 92, 255, 0.18);
+  --accent-bg: rgba(141, 92, 255, 0.12);
+  --danger: #c44a67;
 }
 
 * {
@@ -28,7 +29,7 @@ body {
 body {
   margin: 0;
   font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif;
-  background: transparent;
+  background: var(--app-bg);
   color: var(--text-main);
   overflow: hidden;
   user-select: none;
@@ -40,11 +41,11 @@ button {
 }
 
 .sidebar-shell {
-  width: 320px;
-  min-width: 320px;
-  max-width: 320px;
-  height: 100vh;
-  padding: 8px;
+  width: 100%;
+  min-width: 0;
+  max-width: none;
+  height: 100%;
+  padding: 10px 8px;
 }
 
 .sidebar {
@@ -59,9 +60,9 @@ button {
   background: linear-gradient(180deg, var(--bg-top) 0%, var(--bg-bottom) 100%);
   border: 1px solid var(--panel-border);
   box-shadow:
-    0 24px 60px rgba(0, 0, 0, 0.45),
-    inset 0 1px 0 rgba(255, 255, 255, 0.04),
-    0 0 0 1px rgba(170, 130, 255, 0.06);
+    0 18px 34px rgba(56, 43, 90, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5),
+    0 0 0 1px rgba(141, 92, 255, 0.08);
   backdrop-filter: blur(18px);
   overflow: hidden;
 }
@@ -71,7 +72,7 @@ button {
   inset: -40px auto auto -10px;
   width: 220px;
   height: 160px;
-  background: radial-gradient(circle, rgba(162, 112, 255, 0.16) 0%, rgba(162, 112, 255, 0) 72%);
+  background: radial-gradient(circle, rgba(141, 92, 255, 0.14) 0%, rgba(141, 92, 255, 0) 72%);
   pointer-events: none;
 }
 
@@ -86,7 +87,7 @@ button {
 
 .sidebar__header {
   padding-bottom: 14px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  border-bottom: 1px solid rgba(66, 44, 104, 0.12);
 }
 
 .brand {
@@ -153,7 +154,7 @@ button {
   font-size: 12px;
   font-weight: 600;
   border: 1px solid rgba(255, 255, 255, 0.06);
-  background: rgba(255, 255, 255, 0.04);
+  background: rgba(255, 255, 255, 0.48);
 }
 
 .status-pill__dot {
@@ -165,11 +166,11 @@ button {
 }
 
 .status-online {
-  color: #7be1a8;
+  color: #2fa363;
 }
 
 .status-offline {
-  color: #f0b1c6;
+  color: #b85c79;
 }
 
 .sidebar__meta {
@@ -218,7 +219,7 @@ button {
 
 .sidebar__menu::-webkit-scrollbar-thumb,
 .sidebar__content::-webkit-scrollbar-thumb {
-  background: rgba(184, 140, 255, 0.18);
+  background: rgba(141, 92, 255, 0.24);
   border-radius: 999px;
 }
 
@@ -243,23 +244,23 @@ button {
 }
 
 .menu-item:hover {
-  background: rgba(255, 255, 255, 0.04);
+  background: rgba(255, 255, 255, 0.36);
   transform: translateX(2px);
 }
 
 .menu-item:hover .menu-item__icon,
 .menu-item:hover .menu-item__label {
-  color: #ece3ff;
+  color: #2f2642;
 }
 
 .menu-item--active,
 .menu-group.is-open > .menu-item {
-  background: linear-gradient(180deg, rgba(177, 122, 255, 0.28), rgba(138, 91, 255, 0.2));
-  border: 1px solid rgba(196, 154, 255, 0.35);
+  background: linear-gradient(180deg, rgba(141, 92, 255, 0.2), rgba(141, 92, 255, 0.12));
+  border: 1px solid rgba(141, 92, 255, 0.28);
   box-shadow:
-    0 0 0 1px rgba(196, 154, 255, 0.12),
-    0 8px 24px rgba(125, 79, 255, 0.25),
-    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    0 0 0 1px rgba(141, 92, 255, 0.08),
+    0 8px 20px rgba(141, 92, 255, 0.14),
+    inset 0 1px 0 rgba(255, 255, 255, 0.26);
 }
 
 .menu-item__icon,
@@ -274,7 +275,7 @@ button {
 .menu-item__icon {
   width: 20px;
   height: 20px;
-  color: #8d84a8;
+  color: #7f7594;
 }
 
 .menu-item__label {
@@ -298,7 +299,7 @@ button {
 }
 
 .menu-group.is-open .menu-item__label {
-  color: #ffffff;
+  color: #241b35;
 }
 
 .menu-group.is-open .menu-item__chevron {
@@ -308,7 +309,7 @@ button {
 .submenu {
   margin: 10px 0 0 22px;
   padding-left: 18px;
-  border-left: 1px solid rgba(180, 150, 255, 0.14);
+  border-left: 1px solid rgba(141, 92, 255, 0.18);
   max-height: 0;
   opacity: 0;
   overflow: hidden;
@@ -336,31 +337,31 @@ button {
   border: 1px solid transparent;
   border-radius: 12px;
   background: transparent;
-  color: #b9b2cd;
+  color: #5c536f;
   cursor: pointer;
   transition: all 0.22s ease;
 }
 
 .submenu-item:hover {
-  background: rgba(255, 255, 255, 0.035);
-  color: #f0e9ff;
+  background: rgba(255, 255, 255, 0.32);
+  color: #2d2440;
   transform: translateX(2px);
 }
 
 .submenu-item.active {
-  background: rgba(168, 122, 255, 0.14);
-  border: 1px solid rgba(194, 156, 255, 0.18);
-  color: #f0e9ff;
+  background: rgba(141, 92, 255, 0.12);
+  border: 1px solid rgba(141, 92, 255, 0.18);
+  color: #2d2440;
 }
 
 .submenu-item.status-loading {
-  box-shadow: 0 0 0 1px rgba(196, 154, 255, 0.12);
+  box-shadow: 0 0 0 1px rgba(141, 92, 255, 0.14);
 }
 
 .submenu-item__icon {
   width: 18px;
   height: 18px;
-  color: #a98ae9;
+  color: #8d5cff;
 }
 
 .submenu-item__label {
@@ -377,9 +378,9 @@ button {
   border-radius: 999px;
   padding: 4px 10px;
   font-size: 12px;
-  color: #dcc8ff;
-  border: 1px solid rgba(194, 156, 255, 0.18);
-  background: rgba(174, 140, 255, 0.12);
+  color: #6b47be;
+  border: 1px solid rgba(141, 92, 255, 0.18);
+  background: rgba(141, 92, 255, 0.1);
 }
 
 .sidebar__content {
@@ -393,7 +394,7 @@ button {
   min-height: 96px;
   padding: 16px;
   border-radius: 18px;
-  background: rgba(255, 255, 255, 0.03);
+  background: rgba(255, 255, 255, 0.34);
   border: 1px solid var(--panel-border-soft);
   color: var(--text-soft);
   font-size: 13px;
@@ -403,7 +404,7 @@ button {
 .global-notice {
   margin-top: 10px;
   min-height: 18px;
-  color: var(--text-muted);
+  color: #655d78;
   font-size: 11px;
 }
 
@@ -415,10 +416,10 @@ button {
   height: 58px;
   margin-top: 4px;
   padding: 0 16px;
-  border: 1px solid rgba(190, 155, 255, 0.24);
+  border: 1px solid rgba(141, 92, 255, 0.26);
   border-radius: 18px;
-  background: linear-gradient(180deg, rgba(130, 80, 255, 0.35), rgba(100, 55, 220, 0.28));
-  box-shadow: 0 10px 24px rgba(115, 70, 255, 0.28);
+  background: linear-gradient(180deg, rgba(141, 92, 255, 0.88), rgba(116, 69, 225, 0.84));
+  box-shadow: 0 10px 22px rgba(93, 59, 175, 0.22);
   color: #ffffff;
   cursor: pointer;
   transition: transform 0.22s ease, box-shadow 0.22s ease;
@@ -426,14 +427,14 @@ button {
 
 .create-button:hover {
   transform: translateY(-1px);
-  box-shadow: 0 14px 30px rgba(115, 70, 255, 0.36);
+  box-shadow: 0 14px 28px rgba(93, 59, 175, 0.28);
 }
 
 .create-button__icon,
 .create-button__chevron {
   width: 20px;
   height: 20px;
-  color: #e9ddff;
+  color: #f4edff;
 }
 
 .create-button__label {
@@ -451,8 +452,8 @@ button {
   min-height: 72px;
   padding: 12px 14px;
   border-radius: 18px;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(255, 255, 255, 0.28);
+  border: 1px solid rgba(66, 44, 104, 0.1);
 }
 
 .profile-card__avatar-wrap {
@@ -464,7 +465,7 @@ button {
   height: 42px;
   object-fit: cover;
   border-radius: 50%;
-  border: 2px solid rgba(180, 150, 255, 0.28);
+  border: 2px solid rgba(141, 92, 255, 0.2);
 }
 
 .profile-card__info {
@@ -484,7 +485,7 @@ button {
 .profile-card__role {
   margin-top: 3px;
   font-size: 13px;
-  color: #8d84a8;
+  color: #726985;
 }
 
 .profile-card__action {
@@ -494,14 +495,14 @@ button {
   height: 42px;
   border: 0;
   border-radius: 14px;
-  background: rgba(255, 255, 255, 0.04);
-  color: #d7b5ff;
+  background: rgba(255, 255, 255, 0.38);
+  color: #8d5cff;
   cursor: default;
   transition: background 0.22s ease;
 }
 
 .profile-card__action:hover {
-  background: rgba(180, 140, 255, 0.16);
+  background: rgba(141, 92, 255, 0.14);
 }
 
 .profile-card__action svg {
@@ -520,7 +521,7 @@ button {
 .spinner {
   width: 14px;
   height: 14px;
-  border: 2px solid rgba(255, 255, 255, 0.18);
+  border: 2px solid rgba(66, 44, 104, 0.14);
   border-top-color: var(--accent);
   border-radius: 50%;
   animation: spin 1s linear infinite;
@@ -530,7 +531,7 @@ button {
   overflow: auto;
   max-height: 320px;
   margin-top: 10px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(66, 44, 104, 0.1);
   border-radius: 12px;
 }
 
@@ -538,22 +539,22 @@ button {
   width: 100%;
   border-collapse: collapse;
   font-size: 12px;
-  color: var(--text-soft);
+  color: #4d4460;
 }
 
 .content-table thead tr {
-  background: rgba(94, 55, 161, 0.35);
+  background: rgba(141, 92, 255, 0.16);
 }
 
 .content-table th,
 .content-table td {
   padding: 10px 8px;
   text-align: left;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  border-bottom: 1px solid rgba(66, 44, 104, 0.08);
 }
 
 .content-table code {
-  color: #f0e9ff;
+  color: #34294a;
 }
 
 .table-action {
